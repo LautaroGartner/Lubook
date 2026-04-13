@@ -4,8 +4,40 @@ class User < ApplicationRecord
          :confirmable, :lockable, :trackable, :timeoutable,
          :omniauthable, omniauth_providers: [ :github ]
 
+  before_validation :normalize_username
+
+  private
+
+  def normalize_username
+   self.username = username.downcase.strip if username.present?
+  end
+
   validates :username, presence: true, uniqueness: { case_sensitive: false },
             length: { in: 3..30 }, format: { with: /\A[a-zA-Z0-9_]+\z/ }
+
+has_one  :profile, dependent: :destroy
+has_many :posts,    dependent: :destroy
+has_many :comments, dependent: :destroy
+has_many :likes,    dependent: :destroy
+
+has_many :sent_follow_requests,
+         class_name: "Follow", foreign_key: :requester_id, dependent: :destroy
+has_many :received_follow_requests,
+         class_name: "Follow", foreign_key: :receiver_id, dependent: :destroy
+
+has_many :following, -> { where(follows: { status: Follow.statuses[:accepted] }) },
+         through: :sent_follow_requests, source: :receiver
+has_many :followers, -> { where(follows: { status: Follow.statuses[:accepted] }) },
+         through: :received_follow_requests, source: :requester
+         -> { where(follows: { status: Follow.statuses[:accepted] }) }
+
+after_create :build_default_profile
+
+private
+
+def build_default_profile
+  create_profile!(display_name: username)
+end
 
   def self.from_omniauth(auth)
     where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
