@@ -1,6 +1,6 @@
 # Lubook
 
-A social network built with Ruby on Rails 8, as the capstone project for [The Odin Project's Ruby on Rails course](https://www.theodinproject.com/lessons/ruby-on-rails-odin-book).
+A social network built with Ruby on Rails 8, as a personal project to learn Ruby on Rails.
 
 Built with an emphasis on **user privacy** and **performance caching** from day one — not as an afterthought.
 
