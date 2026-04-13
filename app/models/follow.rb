@@ -3,6 +3,8 @@ class Follow < ApplicationRecord
   belongs_to :receiver,  class_name: "User"
 
   enum :status, { pending: 0, accepted: 1 }, default: :pending
+  scope :pending,  -> { where(status: :pending) }
+  scope :accepted, -> { where(status: :accepted) }
 
   validates :requester_id, uniqueness: { scope: :receiver_id }
   validate  :not_self_follow

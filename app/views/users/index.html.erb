@@ -1,0 +1,32 @@
+<% content_for :title, "People" %>
+
+<h1 class="text-2xl font-bold mb-6">People on Lubook</h1>
+
+<div class="space-y-2">
+  <% @users.each do |user| %>
+    <% follow = @outgoing_follows[user.id] %>
+    <div class="flex items-center justify-between p-4 bg-white border border-stone-200 rounded">
+      <div>
+        <%= link_to user_path(user), class: "font-semibold hover:underline" do %>
+          <%= user.username %>
+        <% end %>
+        <% if user.profile&.display_name.present? && user.profile.display_name != user.username %>
+          <span class="text-stone-500 text-sm ml-2"><%= user.profile.display_name %></span>
+        <% end %>
+      </div>
+
+      <div>
+        <% if follow.nil? %>
+          <%= button_to "Follow", follows_path(receiver_id: user.id),
+                class: "px-3 py-1 text-sm bg-stone-900 text-white rounded hover:bg-stone-700" %>
+        <% elsif follow.pending? %>
+          <%= button_to "Cancel request", follow_path(follow), method: :delete,
+                class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
+        <% elsif follow.accepted? %>
+          <%= button_to "Unfollow", follow_path(follow), method: :delete,
+                class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

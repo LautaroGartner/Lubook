@@ -1,6 +1,24 @@
-<div class="max-w-2xl mx-auto mt-20 text-center">
-  <h1 class="text-4xl font-bold">Lubook</h1>
-  <p class="mt-4 text-gray-600">Welcome, <%= current_user.username %>.</p>
-  <%= button_to "Sign out", destroy_user_session_path, method: :delete,
-        class: "mt-6 px-4 py-2 bg-gray-900 text-white rounded" %>
+<% content_for :title, "Home" %>
+
+<div class="text-center py-12">
+  <h1 class="text-4xl font-bold mb-2">Welcome back, <%= current_user.username %>.</h1>
+  <p class="text-stone-600 mb-8">Your feed is coming in Phase 5.</p>
+
+  <div class="flex justify-center gap-4 text-sm">
+    <%= link_to "Find people to follow", users_path,
+          class: "px-4 py-2 bg-stone-900 text-white rounded hover:bg-stone-700" %>
+    <%= link_to "Edit your profile", edit_user_profile_path(current_user),
+          class: "px-4 py-2 border border-stone-300 rounded hover:bg-stone-100" %>
+  </div>
+
+  <div class="mt-12 grid grid-cols-2 gap-4 max-w-sm mx-auto text-sm">
+    <div class="p-4 bg-white border border-stone-200 rounded">
+      <div class="text-2xl font-bold"><%= current_user.followers.count %></div>
+      <div class="text-stone-600">Followers</div>
+    </div>
+    <div class="p-4 bg-white border border-stone-200 rounded">
+      <div class="text-2xl font-bold"><%= current_user.following.count %></div>
+      <div class="text-stone-600">Following</div>
+    </div>
+  </div>
 </div>

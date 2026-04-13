@@ -1,0 +1,65 @@
+<% content_for :title, @user.username %>
+
+<div class="bg-white border border-stone-200 rounded p-8 mb-6">
+  <div class="flex items-start justify-between">
+    <div>
+      <h1 class="text-3xl font-bold">
+        <%= @user.profile&.display_name.presence || @user.username %>
+      </h1>
+      <p class="text-stone-500">@<%= @user.username %></p>
+
+      <% if @user.profile&.bio.present? %>
+        <p class="mt-4 text-stone-700"><%= @user.profile.bio %></p>
+      <% end %>
+
+      <% if @user.profile&.location.present? %>
+        <p class="mt-2 text-sm text-stone-500">📍 <%= @user.profile.location %></p>
+      <% end %>
+    </div>
+
+    <div>
+      <% if @is_self %>
+        <%= link_to "Edit profile", edit_user_profile_path(@user),
+              class: "px-4 py-2 border border-stone-300 rounded text-sm hover:bg-stone-100" %>
+      <% elsif @follow.nil? %>
+        <%= button_to "Follow", follows_path(receiver_id: @user.id),
+              class: "px-4 py-2 bg-stone-900 text-white rounded text-sm hover:bg-stone-700" %>
+      <% elsif @follow.pending? %>
+        <%= button_to "Cancel request", follow_path(@follow), method: :delete,
+              class: "px-4 py-2 border border-stone-300 rounded text-sm hover:bg-stone-100" %>
+      <% elsif @follow.accepted? %>
+        <%= button_to "Unfollow", follow_path(@follow), method: :delete,
+              class: "px-4 py-2 border border-stone-300 rounded text-sm hover:bg-stone-100" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="flex gap-6 mt-6 pt-6 border-t border-stone-200 text-sm">
+    <div><span class="font-bold"><%= @user.followers.count %></span> <span class="text-stone-500">followers</span></div>
+    <div><span class="font-bold"><%= @user.following.count %></span> <span class="text-stone-500">following</span></div>
+  </div>
+</div>
+
+<% pending = @user.received_follow_requests.pending.includes(:requester) if @is_self %>
+<% if @is_self && pending&.any? %>
+  <div class="bg-white border border-stone-200 rounded p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4">Pending follow requests</h2>
+    <div class="space-y-2">
+      <% pending.each do |req| %>
+        <div class="flex items-center justify-between p-3 border border-stone-200 rounded">
+          <%= link_to req.requester.username, user_path(req.requester), class: "font-semibold hover:underline" %>
+          <div class="flex gap-2">
+            <%= button_to "Accept", accept_follow_path(req), method: :patch,
+                  class: "px-3 py-1 text-sm bg-stone-900 text-white rounded hover:bg-stone-700" %>
+            <%= button_to "Reject", reject_follow_path(req), method: :patch,
+                  class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<div class="bg-white border border-stone-200 rounded p-8 text-center text-stone-500">
+  Posts will appear here in Phase 4.
+</div>
