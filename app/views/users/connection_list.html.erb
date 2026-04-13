@@ -1,0 +1,43 @@
+<% content_for :title, title %>
+
+<div class="flex items-center gap-4 mb-6">
+  <%= link_to "← Back to profile", user_path(@user),
+        class: "text-sm text-stone-500 hover:text-stone-900" %>
+</div>
+
+<h1 class="text-2xl font-bold mb-6"><%= title %></h1>
+
+<% if @users.any? %>
+  <div class="space-y-2">
+    <% @users.each do |user| %>
+      <div class="flex items-center gap-3 p-4 bg-white border border-stone-200 rounded">
+        <% if user.profile&.avatar&.attached? %>
+          <%= link_to user_path(user) do %>
+            <%= image_tag user.profile.avatar.variant(resize_to_fill: [80, 80]),
+                  class: "w-10 h-10 rounded-full object-cover" %>
+          <% end %>
+        <% else %>
+          <div class="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 font-semibold">
+            <%= user.username.first.upcase %>
+          </div>
+        <% end %>
+        <div class="flex-1 min-w-0">
+          <%= link_to user_path(user), class: "font-semibold hover:underline" do %>
+            <%= user.username %>
+          <% end %>
+          <% if user.profile&.display_name.present? && user.profile.display_name != user.username %>
+            <span class="text-stone-500 text-sm ml-2"><%= user.profile.display_name %></span>
+          <% end %>
+          <% if user.profile&.bio.present? %>
+            <p class="text-sm text-stone-600 truncate"><%= user.profile.bio %></p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  <%= render "shared/pagination", pagy: @pagy %>
+<% else %>
+  <div class="bg-white border border-stone-200 rounded p-12 text-center text-stone-500">
+    No one here yet.
+  </div>
+<% end %>

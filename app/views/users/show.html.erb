@@ -2,19 +2,34 @@
 
 <div class="bg-white border border-stone-200 rounded p-8 mb-6">
   <div class="flex items-start justify-between">
-    <div>
-      <h1 class="text-3xl font-bold">
-        <%= @user.profile&.display_name.presence || @user.username %>
-      </h1>
-      <p class="text-stone-500">@<%= @user.username %></p>
-
-      <% if @user.profile&.bio.present? %>
-        <p class="mt-4 text-stone-700"><%= @user.profile.bio %></p>
+    <div class="flex gap-4">
+      <% if @user.profile&.avatar&.attached? %>
+        <%= image_tag @user.profile.avatar.variant(resize_to_fill: [192, 192]),
+              class: "w-24 h-24 rounded-full object-cover border border-stone-200 cursor-zoom-in",
+              data: {
+                controller: "lightbox",
+                action: "click->lightbox#open",
+                lightbox_full_url_value: url_for(@user.profile.avatar)
+              } %>
+      <% else %>
+        <div class="w-24 h-24 rounded-full bg-stone-200 flex items-center justify-center text-3xl text-stone-600 font-semibold">
+          <%= @user.username.first.upcase %>
+        </div>
       <% end %>
+      <div>
+        <h1 class="text-3xl font-bold">
+          <%= @user.profile&.display_name.presence || @user.username %>
+        </h1>
+        <p class="text-stone-500">@<%= @user.username %></p>
 
-      <% if @user.profile&.location.present? %>
-        <p class="mt-2 text-sm text-stone-500">📍 <%= @user.profile.location %></p>
-      <% end %>
+        <% if @user.profile&.bio.present? %>
+          <p class="mt-4 text-stone-700"><%= @user.profile.bio %></p>
+        <% end %>
+
+        <% if @user.profile&.location.present? %>
+          <p class="mt-2 text-sm text-stone-500">📍 <%= @user.profile.location %></p>
+        <% end %>
+      </div>
     </div>
 
     <div>
@@ -34,10 +49,16 @@
     </div>
   </div>
 
-  <div class="flex gap-6 mt-6 pt-6 border-t border-stone-200 text-sm">
-    <div><span class="font-bold"><%= @user.followers.count %></span> <span class="text-stone-500">followers</span></div>
-    <div><span class="font-bold"><%= @user.following.count %></span> <span class="text-stone-500">following</span></div>
-  </div>
+    <div class="flex gap-6 mt-6 pt-6 border-t border-stone-200 text-sm">
+      <%= link_to followers_user_path(@user), class: "hover:text-stone-900" do %>
+        <span class="font-bold"><%= @user.followers.count %></span>
+        <span class="text-stone-500">followers</span>
+    <% end %>
+      <%= link_to following_user_path(@user), class: "hover:text-stone-900" do %>
+       <span class="font-bold"><%= @user.following.count %></span>
+       <span class="text-stone-500">following</span>
+    <% end %>
+    </div>
 </div>
 
 <% pending = @user.received_follow_requests.pending.includes(:requester) if @is_self %>
@@ -60,6 +81,13 @@
   </div>
 <% end %>
 
-<div class="bg-white border border-stone-200 rounded p-8 text-center text-stone-500">
-  Posts will appear here in Phase 4.
-</div>
+<% if @posts.any? %>
+  <div class="space-y-4">
+    <%= render @posts %>
+  </div>
+  <%= render "shared/pagination", pagy: @pagy %>
+<% else %>
+  <div class="bg-white border border-stone-200 rounded p-12 text-center text-stone-500">
+    No posts yet.
+  </div>
+<% end %>

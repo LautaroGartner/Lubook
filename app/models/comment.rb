@@ -6,4 +6,9 @@ class Comment < ApplicationRecord
   validates :body, presence: true, length: { maximum: 2000 }
 
   scope :chronological, -> { order(created_at: :asc) }
+
+  def liked_by?(user)
+    return false unless user
+    likes.exists?(user_id: user.id)
+  end
 end

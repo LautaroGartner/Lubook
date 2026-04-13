@@ -1,0 +1,21 @@
+<% if pagy.pages > 1 %>
+  <nav class="flex items-center justify-center gap-2 mt-6 text-sm">
+    <% if pagy.prev %>
+      <%= link_to "← Newer", url_for(page: pagy.prev),
+            class: "px-3 py-1 border border-stone-300 rounded hover:bg-stone-100" %>
+    <% else %>
+      <span class="px-3 py-1 border border-stone-200 rounded text-stone-300">← Newer</span>
+    <% end %>
+
+    <span class="text-stone-500">
+      Page <%= pagy.page %> of <%= pagy.pages %>
+    </span>
+
+    <% if pagy.next %>
+      <%= link_to "Older →", url_for(page: pagy.next),
+            class: "px-3 py-1 border border-stone-300 rounded hover:bg-stone-100" %>
+    <% else %>
+      <span class="px-3 py-1 border border-stone-200 rounded text-stone-300">Older →</span>
+    <% end %>
+  </nav>
+<% end %>

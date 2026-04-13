@@ -1,32 +1,55 @@
 <% content_for :title, "People" %>
 
-<h1 class="text-2xl font-bold mb-6">People on Lubook</h1>
+<h1 class="text-2xl font-bold mb-4">People on Lubook</h1>
 
-<div class="space-y-2">
-  <% @users.each do |user| %>
-    <% follow = @outgoing_follows[user.id] %>
-    <div class="flex items-center justify-between p-4 bg-white border border-stone-200 rounded">
-      <div>
-        <%= link_to user_path(user), class: "font-semibold hover:underline" do %>
-          <%= user.username %>
-        <% end %>
-        <% if user.profile&.display_name.present? && user.profile.display_name != user.username %>
-          <span class="text-stone-500 text-sm ml-2"><%= user.profile.display_name %></span>
-        <% end %>
-      </div>
+<%= form_with url: users_path, method: :get, class: "mb-6" do |f| %>
+  <div class="flex gap-2">
+    <%= f.text_field :q, value: @query, placeholder: "Search by username...",
+          class: "flex-1 px-3 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-stone-400" %>
+    <%= f.submit "Search",
+          class: "px-4 py-2 bg-stone-900 text-white rounded hover:bg-stone-700 cursor-pointer text-sm" %>
+    <% if @query.present? %>
+      <%= link_to "Clear", users_path,
+            class: "px-4 py-2 border border-stone-300 rounded hover:bg-stone-100 text-sm" %>
+    <% end %>
+  </div>
+<% end %>
 
-      <div>
-        <% if follow.nil? %>
-          <%= button_to "Follow", follows_path(receiver_id: user.id),
-                class: "px-3 py-1 text-sm bg-stone-900 text-white rounded hover:bg-stone-700" %>
-        <% elsif follow.pending? %>
-          <%= button_to "Cancel request", follow_path(follow), method: :delete,
-                class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
-        <% elsif follow.accepted? %>
-          <%= button_to "Unfollow", follow_path(follow), method: :delete,
-                class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
-        <% end %>
+<% if @users.any? %>
+  <div class="space-y-2">
+    <% @users.each do |user| %>
+      <% follow = @outgoing_follows[user.id] %>
+      <div class="flex items-center justify-between p-4 bg-white border border-stone-200 rounded">
+        <div>
+          <%= link_to user_path(user), class: "font-semibold hover:underline" do %>
+            <%= user.username %>
+          <% end %>
+          <% if user.profile&.display_name.present? && user.profile.display_name != user.username %>
+            <span class="text-stone-500 text-sm ml-2"><%= user.profile.display_name %></span>
+          <% end %>
+        </div>
+
+        <div>
+          <% if follow.nil? %>
+            <%= button_to "Follow", follows_path(receiver_id: user.id),
+                  class: "px-3 py-1 text-sm bg-stone-900 text-white rounded hover:bg-stone-700" %>
+          <% elsif follow.pending? %>
+            <%= button_to "Cancel request", follow_path(follow), method: :delete,
+                  class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
+          <% elsif follow.accepted? %>
+            <%= button_to "Unfollow", follow_path(follow), method: :delete,
+                  class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
+          <% end %>
+        </div>
       </div>
-    </div>
-  <% end %>
-</div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="bg-white border border-stone-200 rounded p-12 text-center text-stone-500">
+    <% if @query.present? %>
+      No users match "<%= @query %>".
+    <% else %>
+      No users yet.
+    <% end %>
+  </div>
+<% end %>

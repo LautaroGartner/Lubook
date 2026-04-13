@@ -1,16 +1,39 @@
 class UsersController < ApplicationController
   def index
-    @users = User.includes(:profile)
-                 .where.not(id: current_user.id)
-                 .order(:username)
+    @query = params[:q].to_s.strip
+    @users = User.includes(:profile).where.not(id: current_user.id)
 
-    # Preload the current user's outgoing follows to check status efficiently
-    @outgoing_follows = current_user.sent_follow_requests.index_by(&:receiver_id)
+  if @query.present?
+    @users = @users.where("username ILIKE ?", "%#{@query}%")
+  end
+
+  @users = @users.order(:username)
+  @outgoing_follows = current_user.sent_follow_requests.index_by(&:receiver_id)
   end
 
   def show
     @user = User.includes(:profile).find(params[:id])
     @follow = current_user.sent_follow_requests.find_by(receiver_id: @user.id)
     @is_self = @user.id == current_user.id
+
+    @pagy, @posts = pagy(
+      @user.posts.recent.includes(:user, :likes, :comments, image_attachment: :blob)
+    )
+  end
+
+  def followers
+    @user = User.find(params[:id])
+    @pagy, @users = pagy(
+      @user.followers.includes(:profile).order(:username)
+    )
+    render :connection_list, locals: { title: "#{@user.username}'s followers" }
+  end
+
+  def following
+    @user = User.find(params[:id])
+    @pagy, @users = pagy(
+      @user.following.includes(:profile).order(:username)
+    )
+    render :connection_list, locals: { title: "People #{@user.username} follows" }
   end
 end

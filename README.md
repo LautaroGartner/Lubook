@@ -6,7 +6,7 @@ Built with an emphasis on **user privacy** and **performance caching** from day 
 
 ## Status
 
-🚧 **Phase 3 of 8 complete.** Authentication, full data model, and the social graph UI are in place. Users can browse people, send and accept follow requests, and edit their profiles. Posts, feed, and comments arrive in the next phases.
+🚧 **Phase 4 of 8 complete**, plus pagination, search, follower lists, and account deletion. Users can sign up, follow each other, post text and images, comment, like posts and comments, edit their own posts and profile, browse paginated feeds, search for people, see follower/following lists, and delete their account. Real-time updates and caching land in Phase 5.
 
 ## Stack
 
@@ -15,9 +15,11 @@ Built with an emphasis on **user privacy** and **performance caching** from day 
 - **PostgreSQL** (via Postgres.app)
 - **Hotwire** (Turbo + Stimulus) for reactive UI without a SPA
 - **Tailwind CSS** for styling
+- **Active Storage** with libvips for image uploads and variant processing
 - **Solid Cache / Solid Queue / Solid Cable** — database-backed caching, background jobs, and Action Cable (Rails 8 defaults, no Redis needed)
 - **Devise** for authentication with email/password + GitHub OAuth via OmniAuth
 - **Pundit** for authorization policies
+- **Pagy** for pagination
 - **Rack::Attack** for rate limiting and brute-force protection
 - **RSpec** + FactoryBot + Faker + shoulda-matchers for testing
 - **Letter Opener** for previewing mail in development
@@ -27,12 +29,21 @@ Built with an emphasis on **user privacy** and **performance caching** from day 
 - Email/password signup with mandatory email confirmation
 - GitHub OAuth sign-in (scaffolded)
 - Account lockout after repeated failed logins, unlockable via email
-- User directory with live follow/pending/unfollow states
-- User profile pages with bio, display name, and location
+- Account deletion with cascade cleanup of all owned content
+- User directory with case-insensitive username search and pagination
+- User profile pages with bio, display name, location, and avatar upload
 - Profile editing gated by a Pundit policy (only the owner can edit)
 - Follow request flow: send → receiver sees pending list → accept or reject
-- Unfollow and cancel-request actions from either side
 - Self-follow prevented at the model level
+- Followers and following lists, paginated
+- Posts with text and optional image, with a live file-picker preview
+- Post editing and deletion with Pundit authorization
+- Comments on posts, with delete for the comment author or post owner
+- Polymorphic likes on both posts and comments, with uniqueness enforcement
+- Paginated feed showing posts from the current user plus everyone they follow
+- Retina-quality image variants with a click-to-zoom lightbox
+- Timestamps with relative-time display and hover-to-see-absolute tooltips
+- "Edited" indicator when a post is modified more than a minute after creation
 
 ## Data model
 
@@ -45,20 +56,25 @@ User
  ├── has_many :following  (through accepted follows)
  └── has_many :followers  (through accepted follows)
 
-Profile   belongs_to :user
-Post      belongs_to :user;  has_many :comments, :likes (polymorphic)
+Profile   belongs_to :user;  has_one_attached :avatar
+Post      belongs_to :user;  has_one_attached :image
+                              has_many :comments, :likes (polymorphic)
 Comment   belongs_to :user, :post;  has_many :likes (polymorphic)
 Like      belongs_to :user, :likeable (polymorphic)
 Follow    belongs_to :requester, :receiver (User); enum status { pending, accepted }
 ```
 
-Key design decisions: likes are polymorphic so one table handles likes on both posts and comments; follows live in a single table with an enum status so a "pending" row is a follow request and flipping it to "accepted" makes someone a follower; every association has a DB-level foreign key with `on_delete: :cascade` so orphaned rows are impossible; and every foreign key and query-hot column is indexed (including a composite `[receiver_id, status]` index for fast follower lookups and a `[user_id, created_at]` index for fast per-user timelines).
+Key design decisions: likes are polymorphic so one table handles likes on both posts and comments; follows live in a single table with an enum status so a "pending" row is a follow request and flipping it to "accepted" makes someone a follower; every association has a DB-level foreign key with `on_delete: :cascade` so orphaned rows are impossible (and account deletion cascades cleanly); and every foreign key and query-hot column is indexed (including a composite `[receiver_id, status]` index for fast follower lookups and a `[user_id, created_at]` index for fast per-user timelines).
 
 ## Security & privacy posture
 
 Every controller requires authentication by default via a global `before_action :authenticate_user!` in `ApplicationController`. Public pages must explicitly opt out.
 
-Authorization is handled by Pundit policies. Each sensitive action (editing a profile, accepting a follow request, destroying a follow) runs through an `authorize` call, and a rescue in `ApplicationController` redirects unauthorized users with a flash message instead of leaking a 500.
+Authorization is handled by Pundit policies. Each sensitive action (editing a profile, editing or deleting a post, accepting a follow request, destroying a follow) runs through an `authorize` call, and a rescue in `ApplicationController` redirects unauthorized users with a flash message instead of leaking a 500.
+
+User search uses parameterized SQL with `ILIKE` so user input is never interpolated directly into queries. File uploads are validated for both content type (MIME sniffed from the actual bytes, not the filename) and size at the model level, so a user cannot upload executables or oversized files even by crafting the request manually. Avatars are capped at 5MB; post images at 10MB. Accepted formats are JPEG, PNG, WEBP, and GIF.
+
+Account deletion is wired through Devise's standard `RegistrationsController#destroy`. Because every association uses `dependent: :destroy` at the model level and `on_delete: :cascade` at the database level, deleting a user removes their profile, posts, comments, likes, and follows in a single transaction — no orphaned rows, no leaked data.
 
 Devise is configured with:
 
@@ -78,7 +94,8 @@ Secrets live in Rails encrypted credentials (`config/credentials.yml.enc`), neve
 ## Getting started
 
 ```bash
-# Prerequisites: Ruby 3.4.6, PostgreSQL running, Node not required (importmap)
+# Prerequisites: Ruby 3.4.6, PostgreSQL running, libvips installed
+# On macOS: brew install vips
 
 git clone git@github.com:LautaroGartner/Lubook.git
 cd Lubook
@@ -113,9 +130,10 @@ To enable "Sign in with GitHub" in development:
 - [x] **Phase 1** — Rails foundation, Devise + OAuth scaffold, Rack::Attack, Pundit
 - [x] **Phase 2** — Data model: Profile, Follow, Post, Comment, polymorphic Like
 - [x] **Phase 3** — Profiles, follow requests, users index, Pundit policies
-- [ ] **Phase 4** — Posts, comments, likes UI with image uploads
-- [ ] **Phase 5** — Feed with Russian-doll fragment caching and Turbo Stream updates
-- [ ] **Phase 6** — Hardening: CSP, force_ssl, Brakeman in CI, N+1 elimination
+- [x] **Phase 4** — Posts, comments, likes, Active Storage images, lightbox, post editing
+- [x] **Mini features** — Pagination, follower/following lists, search, account deletion
+- [ ] **Phase 5** — Russian-doll fragment caching, Turbo Stream live updates
+- [ ] **Phase 6** — Hardening: CSP, force_ssl, Brakeman in CI, N+1 elimination, polish pass
 - [ ] **Phase 7** — Test coverage
 - [ ] **Phase 8** — Production deploy with real email
 

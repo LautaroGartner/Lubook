@@ -1,0 +1,71 @@
+<article class="bg-white border border-stone-200 rounded p-6" data-controller="lightbox">
+  <header class="flex items-start justify-between mb-3">
+    <div class="flex items-center gap-3">
+      <% if post.user.profile&.avatar&.attached? %>
+        <%= link_to user_path(post.user) do %>
+          <%= image_tag post.user.profile.avatar.variant(resize_to_fill: [80, 80]),
+                class: "w-10 h-10 rounded-full object-cover" %>
+        <% end %>
+      <% else %>
+        <div class="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 font-semibold">
+          <%= post.user.username.first.upcase %>
+        </div>
+      <% end %>
+      <div>
+        <%= link_to post.user.username, user_path(post.user),
+              class: "font-semibold hover:underline" %>
+        <div class="text-xs text-stone-500">
+         <time datetime="<%= post.created_at.iso8601 %>">
+           <%= time_ago_in_words(post.created_at) %> ago
+           <span class="text-stone-400">· <%= post.created_at.strftime("%b %-d, %Y") %></span>
+         </time>
+          <% if post.updated_at > post.created_at + 1.minute %>
+          · <span title="<%= post.updated_at.strftime("%B %-d, %Y at %-I:%M %p") %>">edited</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <% if policy(post).update? %>
+     <div class="flex gap-3 text-xs">
+       <%= link_to "Edit", edit_post_path(post),
+          class: "text-stone-400 hover:text-stone-900" %>
+       <%= button_to "Delete", post_path(post), method: :delete,
+          data: { turbo_confirm: "Delete this post?" },
+          class: "text-stone-400 hover:text-red-600",
+          form: { class: "inline" } %>
+    </div>
+<% end %>
+
+  </header>
+   
+   <div class="whitespace-pre-wrap text-stone-800 mb-3">
+    <%= simple_format(post.body) %>
+   </div>
+
+  <% if post.image.attached? %>
+    <%= image_tag post.image.variant(resize_to_limit: [1600, 1600], saver: { quality: 85 }),
+      class: "rounded border border-stone-200 mb-3 max-h-96 object-cover cursor-zoom-in",
+      data: { action: "click->lightbox#open", lightbox_full_url_value: url_for(post.image) } %>
+  <% end %>
+
+  <div class="flex items-center gap-4 text-sm text-stone-600 pt-3 border-t border-stone-200">
+    <% if post.liked_by?(current_user) %>
+      <%= button_to post_like_path(post), method: :delete,
+           class: "flex items-center gap-1 text-red-600",
+           form: { class: "inline", data: { turbo_action: "replace" } } do %>
+        ♥ <%= post.likes.size %>
+      <% end %>
+    <% else %>
+      <%= button_to post_like_path(post), method: :post,
+           class: "flex items-center gap-1 hover:text-red-600",
+           form: { class: "inline", data: { turbo_action: "replace" } } do %>
+        ♡ <%= post.likes.size %>
+      <% end %>
+    <% end %>
+
+    <%= link_to post_path(post), class: "flex items-center gap-1 hover:text-stone-900" do %>
+      💬 <%= post.comments.size %>
+    <% end %>
+  </div>
+</article>

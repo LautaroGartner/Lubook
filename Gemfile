@@ -37,7 +37,7 @@ gem "devise"
 gem "omniauth-github"
 gem "omniauth-rails_csrf_protection"
 gem "pundit"
-gem "pagy"
+gem "pagy", "~> 9.3"
 gem "rack-attack"
 
 group :development, :test do
