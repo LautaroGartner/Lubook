@@ -2,11 +2,11 @@
 
 A social network built with Ruby on Rails 8, as a personal project to learn Ruby on Rails.
 
-Built with an emphasis on **user privacy**, **performance caching**, and **security hardening** from day one — not as an afterthought.
+Built with an emphasis on **user privacy**, **performance caching**, **security hardening**, and **test coverage** from day one — not as an afterthought.
 
 ## Status
 
-🚧 **Phase 6 of 8 complete.** The app is now hardened: N+1 queries are monitored in dev with Bullet, Brakeman and bundler-audit run clean, a strict Content Security Policy is enforced, SSL is forced in production, Rack::Attack throttles post and comment creation per user, and all error pages are branded. Tests and production deploy are still ahead.
+🚧 **Phase 7 of 8 complete.** The app has a full RSpec test suite — model specs, policy specs, request specs, and end-to-end system specs — all green. Production deploy is the only thing left.
 
 ## Stack
 
@@ -24,7 +24,7 @@ Built with an emphasis on **user privacy**, **performance caching**, and **secur
 - **Brakeman** for security static analysis
 - **bundler-audit** for gem CVE scanning
 - **Bullet** for N+1 query detection in development
-- **RSpec** + FactoryBot + Faker + shoulda-matchers for testing
+- **RSpec** + FactoryBot + Faker + shoulda-matchers + Capybara for testing
 - **Letter Opener** for previewing mail in development
 
 ## Features
@@ -90,7 +90,7 @@ Dev caching is enabled via `bin/rails dev:cache` and backed by `MemoryStore`. In
 
 Every controller requires authentication by default via a global `before_action :authenticate_user!` in `ApplicationController`. Public pages must explicitly opt out.
 
-Authorization is handled by Pundit policies. Each sensitive action (editing a profile, editing or deleting a post, accepting a follow request, destroying a follow) runs through an `authorize` call, and a rescue in `ApplicationController` redirects unauthorized users with a flash message instead of leaking a 500.
+Authorization is handled by Pundit policies. Each sensitive action (creating or editing a profile, creating, editing, or deleting a post, accepting a follow request, destroying a follow) runs through an `authorize` call, and a rescue in `ApplicationController` redirects unauthorized users with a flash message instead of leaking a 500. Policies are unit-tested against the full matrix of "is author", "is stranger", and "is nil user" to prevent regressions.
 
 A strict **Content Security Policy** is enforced in production: `default-src 'self'`, scripts and styles limited to same-origin with per-request nonces, `object-src 'none'`, `frame-ancestors 'none'` (clickjacking defense), and `form-action 'self'`. Even if an attacker managed to inject a `<script>` tag into a post body, the browser would refuse to run it. In development the CSP runs in report-only mode so violations are logged but not blocked, making it safe to iterate on.
 
@@ -125,6 +125,25 @@ Per-user throttles use `warden.user.id` as the discriminator so users sharing an
 
 Secrets live in Rails encrypted credentials (`config/credentials.yml.enc`), never in environment files or git.
 
+## Testing
+
+The test suite is built on **RSpec** with **FactoryBot**, **Faker**, **shoulda-matchers**, and **Capybara**. It's organized by concern so failures point directly to the layer that broke:
+
+- **Model specs** exercise validations, associations, callbacks, scopes, and instance methods like `Post#liked_by?` and `User#cached_followers_count`. They also verify that `touch: true` on comments and likes actually updates the parent post's timestamp — the mechanism Russian-doll caching relies on.
+- **Policy specs** use custom `permit_actions` / `forbid_actions` matchers to run every Pundit policy through a full matrix of "is author", "is stranger", and "is nil user" cases. This is how the nil-user regression in `PostPolicy#update?` was caught.
+- **Request specs** drive controllers end-to-end via HTTP, with `Devise::Test::IntegrationHelpers` for auth. They cover the happy paths (post creation, follow accept, edit, delete) and the authorization failures (stranger tries to edit someone else's post, requester tries to accept their own follow request).
+- **System specs** spin up a fake browser via Capybara's `rack_test` driver and exercise the critical end-to-end flows: signup, creating a post, following a user, liking a post. These catch integration breakage that slips past the isolated unit tests.
+
+Run the suite:
+
+```bash
+bundle exec rspec              # full suite
+bundle exec rspec spec/models  # just the model specs
+bundle exec rspec spec/system  # just the end-to-end specs
+```
+
+Every test runs inside a transaction that rolls back after the example, so the test database stays clean. The factories generate unique emails and usernames per sequence so there are no uniqueness collisions between examples.
+
 ## Getting started
 
 ```bash
@@ -141,14 +160,15 @@ bin/dev
 
 Visit `http://localhost:3000` and you'll be redirected to the sign-in page. Create an account — the confirmation email will open automatically in a browser tab via Letter Opener. `db:seed` populates 10 fake users with follows, posts, comments, and likes via Faker.
 
-### Running the security checks
+### Running the checks
 
 ```bash
+bundle exec rspec                           # Full test suite
 bin/brakeman                                # Static security analysis
 bundle exec bundler-audit check --update    # Gem CVE scan against the latest DB
 ```
 
-Both should report zero issues on `main`.
+All three should report zero issues on `main`.
 
 ## GitHub OAuth (optional)
 
@@ -178,7 +198,7 @@ To enable "Sign in with GitHub" in development:
 - [x] **Mini features** — Pagination, follower/following lists, search, account deletion
 - [x] **Phase 5** — Russian-doll fragment caching, Turbo Stream live updates, cached follower counts
 - [x] **Phase 6** — Hardening: Bullet, Brakeman, bundler-audit, CSP, force_ssl, rate limits, error pages
-- [ ] **Phase 7** — Test coverage
+- [x] **Phase 7** — RSpec test suite: model, policy, request, and system specs
 - [ ] **Phase 8** — Production deploy with real email
 
 ## License
