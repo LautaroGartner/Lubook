@@ -1,6 +1,6 @@
 class Comment < ApplicationRecord
   belongs_to :user
-  belongs_to :post
+  belongs_to :post, touch: true
   has_many :likes, as: :likeable, dependent: :destroy
 
   validates :body, presence: true, length: { maximum: 2000 }

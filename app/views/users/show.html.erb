@@ -51,13 +51,13 @@
 
     <div class="flex gap-6 mt-6 pt-6 border-t border-stone-200 text-sm">
       <%= link_to followers_user_path(@user), class: "hover:text-stone-900" do %>
-        <span class="font-bold"><%= @user.followers.count %></span>
+        <span class="font-bold"><%= @user.cached_followers_count %></span>
         <span class="text-stone-500">followers</span>
-    <% end %>
+      <% end %>
       <%= link_to following_user_path(@user), class: "hover:text-stone-900" do %>
-       <span class="font-bold"><%= @user.following.count %></span>
-       <span class="text-stone-500">following</span>
-    <% end %>
+        <span class="font-bold"><%= @user.cached_following_count %></span>
+        <span class="text-stone-500">following</span>
+      <% end %>
     </div>
 </div>
 

@@ -1,0 +1,47 @@
+<div class="flex items-start gap-3 pb-4 border-b border-stone-100 last:border-0" id="<%= dom_id(comment) %>">
+  <% if comment.user.profile&.avatar&.attached? %>
+    <%= link_to user_path(comment.user), class: "flex-shrink-0" do %>
+      <%= image_tag comment.user.profile.avatar.variant(resize_to_fill: [64, 64]),
+            class: "w-8 h-8 rounded-full object-cover" %>
+    <% end %>
+  <% else %>
+    <div class="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-xs text-stone-600 font-semibold flex-shrink-0">
+      <%= comment.user.username.first.upcase %>
+    </div>
+  <% end %>
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center gap-2 text-sm">
+      <%= link_to comment.user.username, user_path(comment.user),
+            class: "font-semibold hover:underline" %>
+      <time class="text-stone-400 text-xs"
+            datetime="<%= comment.created_at.iso8601 %>"
+            title="<%= comment.created_at.strftime("%B %-d, %Y at %-I:%M %p") %>">
+        <%= time_ago_in_words(comment.created_at) %> ago
+      </time>
+    </div>
+    <p class="text-stone-800 mt-1 whitespace-pre-wrap"><%= simple_format(comment.body) %></p>
+
+    <div class="flex items-center gap-3 mt-2 text-xs text-stone-500">
+      <% if comment.liked_by?(current_user) %>
+        <%= button_to comment_like_path(comment), method: :delete,
+              class: "text-red-600 hover:underline",
+              form: { class: "inline" } do %>
+          ♥ <%= comment.likes.size %>
+        <% end %>
+      <% else %>
+        <%= button_to comment_like_path(comment), method: :post,
+              class: "hover:text-red-600",
+              form: { class: "inline" } do %>
+          ♡ <%= comment.likes.size %>
+        <% end %>
+      <% end %>
+
+      <% if policy(comment).destroy? %>
+        <%= button_to "Delete", comment_path(comment), method: :delete,
+              data: { turbo_confirm: "Delete this comment?" },
+              class: "text-stone-400 hover:text-red-600",
+              form: { class: "inline" } %>
+      <% end %>
+    </div>
+  </div>
+</div>

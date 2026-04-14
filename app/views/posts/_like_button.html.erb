@@ -1,0 +1,15 @@
+<%= turbo_frame_tag dom_id(post, :like) do %>
+  <% if post.liked_by?(current_user) %>
+    <%= button_to post_like_path(post), method: :delete,
+          class: "flex items-center gap-1 text-red-600",
+          form: { class: "inline" } do %>
+      ♥ <%= post.likes.size %>
+    <% end %>
+  <% else %>
+    <%= button_to post_like_path(post), method: :post,
+          class: "flex items-center gap-1 hover:text-red-600",
+          form: { class: "inline" } do %>
+      ♡ <%= post.likes.size %>
+    <% end %>
+  <% end %>
+<% end %>
