@@ -6,7 +6,7 @@ Built with an emphasis on **user privacy** and **performance caching** from day 
 
 ## Status
 
-🚧 **Phase 4 of 8 complete**, plus pagination, search, follower lists, and account deletion. Users can sign up, follow each other, post text and images, comment, like posts and comments, edit their own posts and profile, browse paginated feeds, search for people, see follower/following lists, and delete their account. Real-time updates and caching land in Phase 5.
+🚧 **Phase 5 of 8 complete.** The feed now uses Russian-doll fragment caching, likes and comments update live via Turbo Streams without page reloads, and follower counts are cached in memory. Posts, profiles, search, follower lists, and account deletion all work. Hardening, tests, and production deploy are still ahead.
 
 ## Stack
 
@@ -40,6 +40,10 @@ Built with an emphasis on **user privacy** and **performance caching** from day 
 - Post editing and deletion with Pundit authorization
 - Comments on posts, with delete for the comment author or post owner
 - Polymorphic likes on both posts and comments, with uniqueness enforcement
+- **Live like toggling via Turbo Streams** — no page reload, no scroll jump
+- **Live comment posting via Turbo Streams** — new comments append without reload, form clears automatically
+- **Russian-doll fragment caching** on the post partial, keyed on `updated_at` and touched by child likes and comments
+- **Low-level caching** of follower and following counts on the profile page, with a 5-minute TTL
 - Paginated feed showing posts from the current user plus everyone they follow
 - Retina-quality image variants with a click-to-zoom lightbox
 - Timestamps with relative-time display and hover-to-see-absolute tooltips
@@ -59,12 +63,22 @@ User
 Profile   belongs_to :user;  has_one_attached :avatar
 Post      belongs_to :user;  has_one_attached :image
                               has_many :comments, :likes (polymorphic)
-Comment   belongs_to :user, :post;  has_many :likes (polymorphic)
-Like      belongs_to :user, :likeable (polymorphic)
+Comment   belongs_to :user, :post (touch: true);  has_many :likes (polymorphic)
+Like      belongs_to :user, :likeable (polymorphic, touch: true)
 Follow    belongs_to :requester, :receiver (User); enum status { pending, accepted }
 ```
 
-Key design decisions: likes are polymorphic so one table handles likes on both posts and comments; follows live in a single table with an enum status so a "pending" row is a follow request and flipping it to "accepted" makes someone a follower; every association has a DB-level foreign key with `on_delete: :cascade` so orphaned rows are impossible (and account deletion cascades cleanly); and every foreign key and query-hot column is indexed (including a composite `[receiver_id, status]` index for fast follower lookups and a `[user_id, created_at]` index for fast per-user timelines).
+Key design decisions: likes are polymorphic so one table handles likes on both posts and comments; follows live in a single table with an enum status so a "pending" row is a follow request and flipping it to "accepted" makes someone a follower; every association has a DB-level foreign key with `on_delete: :cascade` so orphaned rows are impossible (and account deletion cascades cleanly); every foreign key and query-hot column is indexed (including a composite `[receiver_id, status]` index for fast follower lookups and a `[user_id, created_at]` index for fast per-user timelines); and likes and comments both `touch` their parent post so that fragment cache keys automatically invalidate when children change — this is what makes Russian-doll caching work.
+
+## Performance & caching
+
+The feed uses **Russian-doll fragment caching**: each post partial is wrapped in a `cache` block keyed on the post's `updated_at`. When a comment or like is added, `touch: true` bumps the parent's timestamp, which changes the cache key and forces a re-render of only that post's partial — every other post in the feed is served from cache. On a warm cache, rendering 20 posts is effectively free.
+
+The like button is rendered outside the cache block inside its own `turbo_frame_tag`. When a user clicks it, the controller responds with a Turbo Stream `replace` directive that swaps only that button's HTML — no page reload, no scroll jump, no flash of unstyled content. Comment creation uses a multi-directive Turbo Stream response that appends the new comment to the list and replaces the form with a fresh empty one in a single request.
+
+Follower and following counts on the profile page use low-level caching via `Rails.cache.fetch` with a 5-minute TTL, keyed on the user record. This avoids running `COUNT` queries on every profile page load.
+
+Dev caching is enabled via `bin/rails dev:cache` and backed by `MemoryStore`. In production, Solid Cache (Rails 8 default) will back the same cache API against a database table.
 
 ## Security & privacy posture
 
@@ -101,6 +115,7 @@ git clone git@github.com:LautaroGartner/Lubook.git
 cd Lubook
 bundle install
 bin/rails db:create db:migrate db:seed
+bin/rails dev:cache     # turn on dev caching to see fragment caching in action
 bin/dev
 ```
 
@@ -132,7 +147,7 @@ To enable "Sign in with GitHub" in development:
 - [x] **Phase 3** — Profiles, follow requests, users index, Pundit policies
 - [x] **Phase 4** — Posts, comments, likes, Active Storage images, lightbox, post editing
 - [x] **Mini features** — Pagination, follower/following lists, search, account deletion
-- [ ] **Phase 5** — Russian-doll fragment caching, Turbo Stream live updates
+- [x] **Phase 5** — Russian-doll fragment caching, Turbo Stream live updates, cached follower counts
 - [ ] **Phase 6** — Hardening: CSP, force_ssl, Brakeman in CI, N+1 elimination, polish pass
 - [ ] **Phase 7** — Test coverage
 - [ ] **Phase 8** — Production deploy with real email
