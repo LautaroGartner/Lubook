@@ -1,7 +1,11 @@
 FactoryBot.define do
   factory :follow do
-    requester { nil }
-    receiver { nil }
-    status { 1 }
+    association :requester, factory: :user
+    association :receiver, factory: :user
+    status { :pending }
+
+    trait :accepted do
+      status { :accepted }
+    end
   end
 end
