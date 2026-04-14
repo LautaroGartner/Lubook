@@ -55,10 +55,9 @@ end
 
 group :development do
   gem "web-console"
-
-  # --- Phase 1 additions ---
   gem "letter_opener"
   gem "bullet"
+  gem "bundler-audit", require: false
 end
 
 group :test do

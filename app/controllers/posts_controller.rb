@@ -1,10 +1,10 @@
 class PostsController < ApplicationController
   before_action :set_post, only: [ :show, :edit, :update, :destroy ]
 
-  def show
-    @comments = @post.comments.chronological.includes(user: { profile: { avatar_attachment: :blob } })
-    @comment = Comment.new
-  end
+def show
+  @comments = @post.comments.chronological.includes(user: { profile: { avatar_attachment: :blob } })
+  @comment = Comment.new
+end
 
   def create
     @post = current_user.posts.build(post_params)

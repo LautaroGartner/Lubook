@@ -24,4 +24,25 @@ class Rack::Attack
   self.throttled_responder = lambda do |_req|
     [ 429, { "Content-Type" => "text/plain" }, [ "Too many requests. Slow down." ] ]
   end
+
+# Limit post creation to 10 per hour per user
+throttle("posts/user", limit: 10, period: 1.hour) do |req|
+  if req.post? && req.path == "/posts"
+    req.env["warden"]&.user&.id
+  end
+end
+
+# Limit comment creation to 30 per hour per user
+throttle("comments/user", limit: 30, period: 1.hour) do |req|
+  if req.post? && req.path =~ %r{\A/posts/\d+/comments\z}
+    req.env["warden"]&.user&.id
+  end
+end
+
+# Limit follow requests to 20 per hour per user
+throttle("follows/user", limit: 20, period: 1.hour) do |req|
+  if req.post? && req.path == "/follows"
+    req.env["warden"]&.user&.id
+  end
+end
 end

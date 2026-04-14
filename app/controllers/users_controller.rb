@@ -11,15 +11,17 @@ class UsersController < ApplicationController
   @outgoing_follows = current_user.sent_follow_requests.index_by(&:receiver_id)
   end
 
-  def show
-    @user = User.includes(:profile).find(params[:id])
-    @follow = current_user.sent_follow_requests.find_by(receiver_id: @user.id)
-    @is_self = @user.id == current_user.id
+def show
+  @user = User.find(params[:id])
+  @follow = current_user.sent_follow_requests.find_by(receiver_id: @user.id)
+  @is_self = (current_user.id == @user.id)
 
-    @pagy, @posts = pagy(
-      @user.posts.recent.includes(:user, :likes, :comments, image_attachment: :blob)
-    )
-  end
+  @pagy, @posts = pagy(
+    @user.posts
+         .includes(:likes, :comments, user: { profile: { avatar_attachment: :blob } }, image_attachment: :blob)
+         .order(created_at: :desc)
+  )
+end
 
   def followers
     @user = User.find(params[:id])

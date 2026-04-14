@@ -2,11 +2,11 @@
 
 A social network built with Ruby on Rails 8, as a personal project to learn Ruby on Rails.
 
-Built with an emphasis on **user privacy** and **performance caching** from day one — not as an afterthought.
+Built with an emphasis on **user privacy**, **performance caching**, and **security hardening** from day one — not as an afterthought.
 
 ## Status
 
-🚧 **Phase 5 of 8 complete.** The feed now uses Russian-doll fragment caching, likes and comments update live via Turbo Streams without page reloads, and follower counts are cached in memory. Posts, profiles, search, follower lists, and account deletion all work. Hardening, tests, and production deploy are still ahead.
+🚧 **Phase 6 of 8 complete.** The app is now hardened: N+1 queries are monitored in dev with Bullet, Brakeman and bundler-audit run clean, a strict Content Security Policy is enforced, SSL is forced in production, Rack::Attack throttles post and comment creation per user, and all error pages are branded. Tests and production deploy are still ahead.
 
 ## Stack
 
@@ -21,10 +21,13 @@ Built with an emphasis on **user privacy** and **performance caching** from day 
 - **Pundit** for authorization policies
 - **Pagy** for pagination
 - **Rack::Attack** for rate limiting and brute-force protection
+- **Brakeman** for security static analysis
+- **bundler-audit** for gem CVE scanning
+- **Bullet** for N+1 query detection in development
 - **RSpec** + FactoryBot + Faker + shoulda-matchers for testing
 - **Letter Opener** for previewing mail in development
 
-## Features so far
+## Features
 
 - Email/password signup with mandatory email confirmation
 - GitHub OAuth sign-in (scaffolded)
@@ -40,14 +43,15 @@ Built with an emphasis on **user privacy** and **performance caching** from day 
 - Post editing and deletion with Pundit authorization
 - Comments on posts, with delete for the comment author or post owner
 - Polymorphic likes on both posts and comments, with uniqueness enforcement
-- **Live like toggling via Turbo Streams** — no page reload, no scroll jump
-- **Live comment posting via Turbo Streams** — new comments append without reload, form clears automatically
-- **Russian-doll fragment caching** on the post partial, keyed on `updated_at` and touched by child likes and comments
-- **Low-level caching** of follower and following counts on the profile page, with a 5-minute TTL
+- Live like toggling via Turbo Streams — no page reload, no scroll jump
+- Live comment posting via Turbo Streams — new comments append without reload, form clears automatically
+- Russian-doll fragment caching on the post partial, keyed on `updated_at` and touched by child likes and comments
+- Low-level caching of follower and following counts on the profile page, with a 5-minute TTL
 - Paginated feed showing posts from the current user plus everyone they follow
 - Retina-quality image variants with a click-to-zoom lightbox
 - Timestamps with relative-time display and hover-to-see-absolute tooltips
 - "Edited" indicator when a post is modified more than a minute after creation
+- Branded 400 / 404 / 406 / 422 / 500 error pages that work even when the Rails app is down
 
 ## Data model
 
@@ -78,6 +82,8 @@ The like button is rendered outside the cache block inside its own `turbo_frame_
 
 Follower and following counts on the profile page use low-level caching via `Rails.cache.fetch` with a 5-minute TTL, keyed on the user record. This avoids running `COUNT` queries on every profile page load.
 
+N+1 queries are monitored in development via the Bullet gem, which logs warnings to the browser console, a footer overlay, and `log/bullet.log` when any controller fires more queries than it should. Feed, profile, and post show pages all preload their required associations (`:user`, `:profile`, `avatar_attachment`, `:likes`, `:comments`, `image_attachment`) in single eager-loaded queries.
+
 Dev caching is enabled via `bin/rails dev:cache` and backed by `MemoryStore`. In production, Solid Cache (Rails 8 default) will back the same cache API against a database table.
 
 ## Security & privacy posture
@@ -85,6 +91,10 @@ Dev caching is enabled via `bin/rails dev:cache` and backed by `MemoryStore`. In
 Every controller requires authentication by default via a global `before_action :authenticate_user!` in `ApplicationController`. Public pages must explicitly opt out.
 
 Authorization is handled by Pundit policies. Each sensitive action (editing a profile, editing or deleting a post, accepting a follow request, destroying a follow) runs through an `authorize` call, and a rescue in `ApplicationController` redirects unauthorized users with a flash message instead of leaking a 500.
+
+A strict **Content Security Policy** is enforced in production: `default-src 'self'`, scripts and styles limited to same-origin with per-request nonces, `object-src 'none'`, `frame-ancestors 'none'` (clickjacking defense), and `form-action 'self'`. Even if an attacker managed to inject a `<script>` tag into a post body, the browser would refuse to run it. In development the CSP runs in report-only mode so violations are logged but not blocked, making it safe to iterate on.
+
+SSL is forced in production via `config.force_ssl = true`: all HTTP requests are redirected to HTTPS, cookies are marked secure, and HSTS is enabled so browsers refuse to even attempt HTTP on subsequent visits.
 
 User search uses parameterized SQL with `ILIKE` so user input is never interpolated directly into queries. File uploads are validated for both content type (MIME sniffed from the actual bytes, not the filename) and size at the model level, so a user cannot upload executables or oversized files even by crafting the request manually. Avatars are capped at 5MB; post images at 10MB. Accepted formats are JPEG, PNG, WEBP, and GIF.
 
@@ -101,7 +111,17 @@ Devise is configured with:
 
 Usernames are normalized to lowercase before validation and enforced unique via a case-insensitive PostgreSQL index (`LOWER(username)`). Follow requests cannot target the requester themselves. Likes enforce uniqueness per `(user, likeable_type, likeable_id)` so a user can like each post or comment at most once.
 
-Rack::Attack throttles the login endpoint at 5 attempts per 20 seconds per IP and per email, and the signup endpoint at 3 per hour per IP.
+**Rack::Attack** throttles several endpoints:
+
+- Login — 5 attempts per 20 seconds per IP and per email
+- Signup — 3 per hour per IP
+- Post creation — 10 per hour per user
+- Comment creation — 30 per hour per user
+- Follow requests — 20 per hour per user
+
+Per-user throttles use `warden.user.id` as the discriminator so users sharing an IP (dorm rooms, offices, coffee shops) are not collectively punished for one user's behavior.
+
+**Brakeman** is run as part of the hardening checklist and currently reports zero warnings. **bundler-audit** is run against the latest CVE database and currently reports no vulnerable gems. Both tools are installed as part of the dev environment and should be run before any release.
 
 Secrets live in Rails encrypted credentials (`config/credentials.yml.enc`), never in environment files or git.
 
@@ -120,6 +140,15 @@ bin/dev
 ```
 
 Visit `http://localhost:3000` and you'll be redirected to the sign-in page. Create an account — the confirmation email will open automatically in a browser tab via Letter Opener. `db:seed` populates 10 fake users with follows, posts, comments, and likes via Faker.
+
+### Running the security checks
+
+```bash
+bin/brakeman                                # Static security analysis
+bundle exec bundler-audit check --update    # Gem CVE scan against the latest DB
+```
+
+Both should report zero issues on `main`.
 
 ## GitHub OAuth (optional)
 
@@ -148,7 +177,7 @@ To enable "Sign in with GitHub" in development:
 - [x] **Phase 4** — Posts, comments, likes, Active Storage images, lightbox, post editing
 - [x] **Mini features** — Pagination, follower/following lists, search, account deletion
 - [x] **Phase 5** — Russian-doll fragment caching, Turbo Stream live updates, cached follower counts
-- [ ] **Phase 6** — Hardening: CSP, force_ssl, Brakeman in CI, N+1 elimination, polish pass
+- [x] **Phase 6** — Hardening: Bullet, Brakeman, bundler-audit, CSP, force_ssl, rate limits, error pages
 - [ ] **Phase 7** — Test coverage
 - [ ] **Phase 8** — Production deploy with real email
 
