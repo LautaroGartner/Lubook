@@ -4,15 +4,17 @@ A social network built with Ruby on Rails 8, as a personal project to learn Ruby
 
 Built with an emphasis on **user privacy**, **performance caching**, **security hardening**, and **test coverage** from day one — not as an afterthought.
 
+🌐 **Live at [lubook.fly.dev](https://lubook.fly.dev)**
+
 ## Status
 
-🚧 **Phase 7 of 8 complete.** The app has a full RSpec test suite — model specs, policy specs, request specs, and end-to-end system specs — all green. Production deploy is the only thing left.
+✅ **All 8 phases complete.** Lubook is live in production: deployed on Fly.io with Postgres on Supabase, persistent image storage on a Fly volume, transactional email via Postmark, and HTTPS everywhere. Sign up, confirm your email, post, follow, like, comment.
 
 ## Stack
 
 - **Ruby** 3.4.6
 - **Rails** 8.1
-- **PostgreSQL** (via Postgres.app)
+- **PostgreSQL** (Postgres.app in dev, Supabase in production)
 - **Hotwire** (Turbo + Stimulus) for reactive UI without a SPA
 - **Tailwind CSS** for styling
 - **Active Storage** with libvips for image uploads and variant processing
@@ -26,6 +28,9 @@ Built with an emphasis on **user privacy**, **performance caching**, **security 
 - **Bullet** for N+1 query detection in development
 - **RSpec** + FactoryBot + Faker + shoulda-matchers + Capybara for testing
 - **Letter Opener** for previewing mail in development
+- **Postmark** for transactional email in production
+- **Fly.io** for hosting (gru — São Paulo region)
+- **Thruster** as the production web server (HTTP/2, asset caching, X-Sendfile)
 
 ## Features
 
@@ -84,7 +89,7 @@ Follower and following counts on the profile page use low-level caching via `Rai
 
 N+1 queries are monitored in development via the Bullet gem, which logs warnings to the browser console, a footer overlay, and `log/bullet.log` when any controller fires more queries than it should. Feed, profile, and post show pages all preload their required associations (`:user`, `:profile`, `avatar_attachment`, `:likes`, `:comments`, `image_attachment`) in single eager-loaded queries.
 
-Dev caching is enabled via `bin/rails dev:cache` and backed by `MemoryStore`. In production, Solid Cache (Rails 8 default) will back the same cache API against a database table.
+In production, **Solid Cache** persists the fragment cache to the same Postgres database that holds the app data, so caches survive deploys. **Solid Queue** runs background jobs (Active Storage image analysis, etc.) without needing Redis. **Thruster** sits in front of Puma to handle HTTP/2 and serve static assets with far-future cache headers.
 
 ## Security & privacy posture
 
@@ -94,7 +99,7 @@ Authorization is handled by Pundit policies. Each sensitive action (creating or 
 
 A strict **Content Security Policy** is enforced in production: `default-src 'self'`, scripts and styles limited to same-origin with per-request nonces, `object-src 'none'`, `frame-ancestors 'none'` (clickjacking defense), and `form-action 'self'`. Even if an attacker managed to inject a `<script>` tag into a post body, the browser would refuse to run it. In development the CSP runs in report-only mode so violations are logged but not blocked, making it safe to iterate on.
 
-SSL is forced in production via `config.force_ssl = true`: all HTTP requests are redirected to HTTPS, cookies are marked secure, and HSTS is enabled so browsers refuse to even attempt HTTP on subsequent visits.
+SSL is forced in production via `config.force_ssl = true`: all HTTP requests are redirected to HTTPS, cookies are marked secure, and HSTS is enabled so browsers refuse to even attempt HTTP on subsequent visits. Fly.io provisions and renews the TLS certificate automatically.
 
 User search uses parameterized SQL with `ILIKE` so user input is never interpolated directly into queries. File uploads are validated for both content type (MIME sniffed from the actual bytes, not the filename) and size at the model level, so a user cannot upload executables or oversized files even by crafting the request manually. Avatars are capped at 5MB; post images at 10MB. Accepted formats are JPEG, PNG, WEBP, and GIF.
 
@@ -123,7 +128,7 @@ Per-user throttles use `warden.user.id` as the discriminator so users sharing an
 
 **Brakeman** is run as part of the hardening checklist and currently reports zero warnings. **bundler-audit** is run against the latest CVE database and currently reports no vulnerable gems. Both tools are installed as part of the dev environment and should be run before any release.
 
-Secrets live in Rails encrypted credentials (`config/credentials.yml.enc`), never in environment files or git.
+Secrets live in Rails encrypted credentials (`config/credentials.yml.enc`) in development and in Fly.io secrets in production. The Postgres connection string and Postmark API token are never in source control.
 
 ## Testing
 
@@ -144,7 +149,26 @@ bundle exec rspec spec/system  # just the end-to-end specs
 
 Every test runs inside a transaction that rolls back after the example, so the test database stays clean. The factories generate unique emails and usernames per sequence so there are no uniqueness collisions between examples.
 
-## Getting started
+## Deployment
+
+Lubook runs on **Fly.io** in the `gru` (São Paulo) region:
+
+- **App server**: a single shared-CPU machine, 1GB RAM, scales to zero when idle and back up on demand
+- **Database**: Supabase Postgres (free tier), connected via the transaction pooler with `prepared_statements: false` and `advisory_locks: false` to play nicely with PgBouncer
+- **Object storage**: a 1GB Fly volume mounted at `/data/storage` for Active Storage uploads — survives every deploy
+- **Email**: Postmark for confirmation, password reset, and account unlock messages
+- **TLS**: automatic via Fly's edge proxy
+- **Logs**: streamed to stdout, captured by `fly logs`
+
+Deploy command from a developer machine:
+
+```bash
+fly deploy
+```
+
+Fly builds the Dockerfile in their cloud, pushes the image, runs `bin/rails db:prepare` as the release command, then boots the new app machine behind a `/up` health check before swapping traffic over. A typical deploy takes 3–5 minutes.
+
+## Getting started (local development)
 
 ```bash
 # Prerequisites: Ruby 3.4.6, PostgreSQL running, libvips installed
@@ -199,7 +223,17 @@ To enable "Sign in with GitHub" in development:
 - [x] **Phase 5** — Russian-doll fragment caching, Turbo Stream live updates, cached follower counts
 - [x] **Phase 6** — Hardening: Bullet, Brakeman, bundler-audit, CSP, force_ssl, rate limits, error pages
 - [x] **Phase 7** — RSpec test suite: model, policy, request, and system specs
-- [ ] **Phase 8** — Production deploy with real email
+- [x] **Phase 8** — Production deploy to Fly.io with Supabase Postgres, Postmark email, persistent volume storage
+
+### Post-launch ideas
+
+These aren't required by the Odin Project spec but would be natural next features:
+
+- Frontend polish pass — accent color, custom logo, micro-animations, empty-state personality
+- Threaded comment replies
+- Notifications (in-app dropdown + email digest)
+- @mentions in posts and comments
+- Reposts / shares
 
 ## License
 
