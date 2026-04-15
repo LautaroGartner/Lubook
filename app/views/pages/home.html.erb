@@ -15,7 +15,7 @@
               class: "hidden", data: { action: "change->upload#preview" } %>
       </label>
       <%= f.submit "Post",
-            class: "px-5 py-2 bg-stone-900 text-white rounded hover:bg-stone-700 cursor-pointer text-sm font-medium" %>
+            class: "px-5 py-2 bg-rose-500 text-white rounded hover:bg-rose-600 transition-colors cursor-pointer text-sm font-medium" %>
     </div>
   <% end %>
 </div>
@@ -27,7 +27,7 @@
   <%= render "shared/pagination", pagy: @pagy %>
 <% else %>
   <div class="bg-white border border-stone-200 rounded p-12 text-center text-stone-500">
-    <p class="mb-2">No posts yet.</p>
-    <p class="text-sm">Follow some people or make your first post above.</p>
+    <p class="text-lg font-serif text-stone-700 mb-2">It's quiet here.</p>
+    <p class="text-sm">Post something above, or wander over to <%= link_to "People", users_path, class: "text-rose-600 hover:text-rose-700 transition-colors" %> and find some friends.</p>
   </div>
 <% end %>

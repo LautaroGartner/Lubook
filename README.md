@@ -235,6 +235,15 @@ These aren't required by the Odin Project spec but would be natural next feature
 - @mentions in posts and comments
 - Reposts / shares
 
+### Post-launch progress
+
+- [x] **Round 1 polish** — dusty rose accent (`#C97B84`), Cormorant Garamond wordmark, sticky navbar, hover micro-animations, empty states with personality
+- [ ] Round 2 — account settings (edit email/password/delete account), Tier 2 polish (like-button animation, skeleton loaders, typography pass)
+- [ ] Round 3 — threaded comment replies
+- [ ] Round 4 — notifications system (in-app dropdown + unread counter)
+- [ ] Round 5 — @mentions in posts/comments
+- [ ] Round 6 — reposts/shares
+
 ## License
 
 MIT

@@ -35,13 +35,13 @@
     <div>
       <% if @is_self %>
         <%= link_to "Edit profile", edit_user_profile_path(@user),
-              class: "px-4 py-2 border border-stone-300 rounded text-sm hover:bg-stone-100" %>
+              class: "px-4 py-2 border border-rose-200 text-rose-700 rounded text-sm hover:bg-rose-50 transition-colors" %>
       <% elsif @follow.nil? %>
         <%= button_to "Follow", follows_path(receiver_id: @user.id),
-              class: "px-4 py-2 bg-stone-900 text-white rounded text-sm hover:bg-stone-700" %>
+              class: "px-4 py-2 bg-rose-500 text-white rounded text-sm hover:bg-rose-600 transition-colors" %>
       <% elsif @follow.pending? %>
         <%= button_to "Cancel request", follow_path(@follow), method: :delete,
-              class: "px-4 py-2 border border-stone-300 rounded text-sm hover:bg-stone-100" %>
+              class: "px-4 py-2 border border-stone-300 text-stone-600 rounded text-sm hover:bg-stone-100 transition-colors" %>
       <% elsif @follow.accepted? %>
         <%= button_to "Unfollow", follow_path(@follow), method: :delete,
               class: "px-4 py-2 border border-stone-300 rounded text-sm hover:bg-stone-100" %>
@@ -71,7 +71,7 @@
           <%= link_to req.requester.username, user_path(req.requester), class: "font-semibold hover:underline" %>
           <div class="flex gap-2">
             <%= button_to "Accept", accept_follow_path(req), method: :patch,
-                  class: "px-3 py-1 text-sm bg-stone-900 text-white rounded hover:bg-stone-700" %>
+                  class: "px-3 py-1 text-sm bg-rose-500 text-white rounded hover:bg-rose-600 transition-colors" %>
             <%= button_to "Reject", reject_follow_path(req), method: :patch,
                   class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
           </div>
@@ -88,6 +88,12 @@
   <%= render "shared/pagination", pagy: @pagy %>
 <% else %>
   <div class="bg-white border border-stone-200 rounded p-12 text-center text-stone-500">
-    No posts yet.
+    <% if current_user == @user %>
+      <p class="text-lg font-serif text-stone-700 mb-2">You haven't posted yet.</p>
+      <p class="text-sm">Head <%= link_to "home", root_path, class: "text-rose-600 hover:text-rose-700 transition-colors" %> to share your first thought.</p>
+    <% else %>
+      <p class="text-lg font-serif text-stone-700 mb-2">Nothing here yet.</p>
+      <p class="text-sm"><%= @user.username %> hasn't posted anything — check back soon.</p>
+    <% end %>
   </div>
 <% end %>

@@ -24,13 +24,13 @@
     <div class="flex items-center gap-3 mt-2 text-xs text-stone-500">
       <% if comment.liked_by?(current_user) %>
         <%= button_to comment_like_path(comment), method: :delete,
-              class: "text-red-600 hover:underline",
+              class: "text-rose-600 hover:text-rose-700 transition-colors",
               form: { class: "inline" } do %>
           ♥ <%= comment.likes.size %>
         <% end %>
       <% else %>
         <%= button_to comment_like_path(comment), method: :post,
-              class: "hover:text-red-600",
+              class: "hover:text-rose-600 transition-colors",
               form: { class: "inline" } do %>
           ♡ <%= comment.likes.size %>
         <% end %>
@@ -39,7 +39,7 @@
       <% if policy(comment).destroy? %>
         <%= button_to "Delete", comment_path(comment), method: :delete,
               data: { turbo_confirm: "Delete this comment?" },
-              class: "text-stone-400 hover:text-red-600",
+              class: "text-stone-400 hover:text-rose-600 transition-colors",
               form: { class: "inline" } %>
       <% end %>
     </div>

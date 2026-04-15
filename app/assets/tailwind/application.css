@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@theme {
+  /* Lubook accent: dusty mauve-rose, named after Luciérnaga */
+  --color-rose-50:  #FAEDEF;
+  --color-rose-100: #F5DBE0;
+  --color-rose-200: #E8B8C0;
+  --color-rose-400: #D49AA3;
+  --color-rose-500: #C97B84;
+  --color-rose-600: #B86670;
+  --color-rose-700: #9E545D;
+  --color-rose-900: #6B3A40;
+
+  /* Editorial serif for the wordmark */
+  --font-serif: "Cormorant Garamond", "Cormorant", Georgia, serif;
+}
