@@ -17,6 +17,7 @@ gem "bootsnap", require: false
 gem "kamal", require: false
 gem "thruster", require: false
 gem "image_processing", "~> 1.2"
+gem "postmark-rails"
 
 # --- Phase 1 additions ---
 gem "devise"

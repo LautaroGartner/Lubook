@@ -3,19 +3,13 @@ primary_region = 'gru'
 console_command = '/rails/bin/rails console'
 
 [env]
-  PORT = "80"
   RAILS_LOG_TO_STDOUT = "1"
 
-[build]
-
-[deploy]
-  release_command = './bin/rails db:prepare'
-
 [processes]
-  app = './bin/thrust ./bin/rails server'
+  app = './bin/rails server -p 3000 -b 0.0.0.0'
 
 [http_service]
-  internal_port = 80
+  internal_port = 3000
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
@@ -25,7 +19,7 @@ console_command = '/rails/bin/rails console'
   [[http_service.checks]]
     interval = '10s'
     timeout = '2s'
-    grace_period = '5s'
+    grace_period = '10s'
     method = 'GET'
     path = '/up'
     protocol = 'http'
