@@ -21,7 +21,7 @@ class Comments::LikesController < ApplicationController
         render turbo_stream: turbo_stream.replace(
           helpers.dom_id(@comment),
           partial: "comments/comment",
-          locals: { comment: @comment }
+          locals: { comment: @comment, just_liked: action_name == "create" }
         )
       end
       format.html { redirect_back(fallback_location: post_path(@comment.post)) }

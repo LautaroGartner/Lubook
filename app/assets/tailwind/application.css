@@ -14,3 +14,23 @@
   /* Editorial serif for the wordmark */
   --font-serif: "Cormorant Garamond", "Cormorant", Georgia, serif;
 }
+
+@layer utilities {
+  @keyframes heart-pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    70%  { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+
+  .animate-heart-pop {
+    animation: heart-pop 0.4s ease-out;
+  }
+
+  .prose-tight p {
+    margin: 0;
+  }
+  .prose-tight p + p {
+    margin-top: 0.75rem;
+  }
+}

@@ -5,10 +5,6 @@ Rails.application.routes.draw do
 
   resources :users, only: [ :index, :show ] do
     resource :profile, only: [ :edit, :update ], module: :users
-  end
-
-  resources :users, only: [ :index, :show ] do
-    resource :profile, only: [ :edit, :update ], module: :users
     member do
       get :followers
       get :following

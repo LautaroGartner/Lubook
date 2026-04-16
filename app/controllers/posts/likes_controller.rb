@@ -21,7 +21,7 @@ class Posts::LikesController < ApplicationController
         render turbo_stream: turbo_stream.replace(
           helpers.dom_id(@post, :like),
           partial: "posts/like_button",
-          locals: { post: @post }
+          locals: { post: @post, just_liked: action_name == "create" }
         )
       end
       format.html { redirect_back(fallback_location: post_path(@post)) }

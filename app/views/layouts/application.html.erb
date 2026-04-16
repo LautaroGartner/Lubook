@@ -35,10 +35,11 @@
               class: "text-stone-600 hover:text-rose-600 transition-colors" %>
             <%= link_to "Profile", user_path(current_user),
               class: "text-stone-600 hover:text-rose-600 transition-colors" %>
+            <%= link_to "Settings", edit_user_registration_path,
+              class: "text-stone-600 hover:text-rose-600 transition-colors" %>
             <%= button_to "Sign out", destroy_user_session_path, method: :delete,
               class: "text-stone-400 hover:text-rose-600 transition-colors",
               form: { data: { turbo: false } } %>
-          </div>
         </div>
       </nav>
     <% end %>

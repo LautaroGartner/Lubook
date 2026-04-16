@@ -1,7 +1,7 @@
 <%= turbo_frame_tag dom_id(post, :like) do %>
   <% if post.liked_by?(current_user) %>
     <%= button_to post_like_path(post), method: :delete,
-          class: "flex items-center gap-1 text-rose-600 hover:text-rose-700 transition-all hover:scale-110 no-underline",
+          class: "flex items-center gap-1 text-rose-600 hover:text-rose-700 transition-all hover:scale-110 no-underline #{"animate-heart-pop" if local_assigns[:just_liked]}",
           form: { class: "inline" } do %>
       ♥ <%= post.likes.size %>
     <% end %>
