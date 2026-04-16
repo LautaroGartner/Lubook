@@ -8,7 +8,9 @@ Bundler.require(*Rails.groups)
 
 module Lubook
   class Application < Rails::Application
-    config.action_mailer.default_options = { from: "contact@paideiastudios.com" }
+    config.action_mailer.default_options = {
+      from: ENV.fetch("MAILER_FROM", "contact@paideiastudios.com")
+    }
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
     config.middleware.use Rack::Attack

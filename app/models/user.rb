@@ -7,7 +7,7 @@ class User < ApplicationRecord
   before_validation :normalize_username
 
   validates :username, presence: true, uniqueness: { case_sensitive: false },
-            length: { in: 3..30 }, format: { with: /\A[a-zA-Z0-9_]+\z/ }
+          length: { in: 3..30 }, format: { with: /\A[a-zA-Z0-9_.]+\z/ }
 
   has_one  :profile,  dependent: :destroy
   has_many :posts,    dependent: :destroy
