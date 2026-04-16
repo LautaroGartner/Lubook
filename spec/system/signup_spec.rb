@@ -7,7 +7,7 @@ RSpec.describe "Signup", type: :system do
     fill_in "Username", with: "newuser"
     fill_in "Email", with: "new@example.com"
     fill_in "Password", with: "testpassword123", match: :prefer_exact
-    fill_in "Password confirmation", with: "testpassword123"
+    fill_in "Confirm password", with: "testpassword123"
 
     click_button "Sign up"
 
