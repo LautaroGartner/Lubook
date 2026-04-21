@@ -7,7 +7,7 @@ export default class extends Controller {
     if (event.key !== "Enter" || event.shiftKey || event.isComposing) return
 
     event.preventDefault()
-    this.element.requestSubmit()
+    event.target.form?.requestSubmit()
   }
 
   reply(event) {
