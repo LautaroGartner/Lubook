@@ -39,9 +39,14 @@ module ApplicationHelper
     return unless other_participant&.share_read_receipts?
 
     other_state = conversation.participant_for(other_participant)
-    last_outgoing_message = conversation.messages.where(user: current_user).order(created_at: :desc).first
-    return unless other_state&.last_read_at.present? && last_outgoing_message.present?
-    return unless other_state.last_read_at >= last_outgoing_message.created_at
+    return unless other_state&.last_read_at.present?
+
+    last_read_outgoing_message = conversation.messages
+                                            .where(user: current_user)
+                                            .where("created_at <= ?", other_state.last_read_at)
+                                            .order(created_at: :desc)
+                                            .first
+    return unless last_read_outgoing_message.present?
 
     "Seen #{time_ago_in_words(other_state.last_read_at)} ago"
   end

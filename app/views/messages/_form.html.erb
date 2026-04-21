@@ -37,7 +37,7 @@
                 data: { action: "change->upload#preview" } %>
         </label>
       </div>
-      <p class="text-xs text-stone-400 text-right">Enter to send, Shift+Enter for a new line.</p>
+      <p class="hidden md:block text-xs text-stone-400 text-right">Enter to send, Shift+Enter for a new line.</p>
     </div>
     <% if message.errors.any? %>
       <p class="text-sm text-rose-600"><%= message.errors.full_messages.to_sentence %></p>

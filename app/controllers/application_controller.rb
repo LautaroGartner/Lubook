@@ -33,7 +33,7 @@ class ApplicationController < ActionController::Base
 
   def track_last_active!
     last_ping = session[:last_active_ping_at].presence && Time.at(session[:last_active_ping_at].to_i)
-    return if last_ping.present? && last_ping >= 1.minute.ago
+    return if last_ping.present? && last_ping >= 20.seconds.ago
 
     current_user.update_column(:last_active_at, Time.current)
     session[:last_active_ping_at] = Time.current.to_i

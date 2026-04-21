@@ -5,6 +5,7 @@ export default class extends Controller {
 
   submitOnEnter(event) {
     if (event.key !== "Enter" || event.shiftKey || event.isComposing) return
+    if (window.matchMedia("(max-width: 767px), (pointer: coarse)").matches) return
 
     event.preventDefault()
     event.target.form?.requestSubmit()

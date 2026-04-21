@@ -63,11 +63,15 @@
 
     <!-- Hamburger button (shown on mobile) -->
     <button type="button" data-action="click->menu#toggle"
-            class="md:hidden text-stone-600 hover:text-rose-600 transition-colors p-2 -mr-2"
+            class="relative md:hidden text-stone-600 hover:text-rose-600 transition-colors p-2 -mr-2"
             aria-label="Menu">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
+      <%= render "shared/notifications_badge",
+            count: @unread_notifications_count,
+            badge_id: "mobile_menu_notifications_badge",
+            badge_classes: "absolute -right-1 -top-1 min-w-4 h-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold text-white" %>
     </button>
   </div>
 
@@ -78,18 +82,22 @@
             class: "block py-3 text-stone-700 hover:text-rose-600 transition-colors border-b border-stone-100" %>
       <%= link_to "People", users_path,
             class: "block py-3 text-stone-700 hover:text-rose-600 transition-colors border-b border-stone-100" %>
-      <%= link_to "Chats", conversations_path,
-            class: "block py-3 text-stone-700 hover:text-rose-600 transition-colors border-b border-stone-100" %>
-      <% if @unread_chats_count.to_i.positive? %>
-        <div class="px-0 pb-3 -mt-2 text-xs text-stone-500 border-b border-stone-100">
-          <span class="inline-flex min-w-5 h-5 items-center justify-center rounded-full bg-stone-900 px-1.5 font-semibold text-white">
-            <%= @unread_chats_count %>
-          </span>
-          unread chats
-        </div>
+      <%= link_to conversations_path,
+            class: "py-3 text-stone-700 hover:text-rose-600 transition-colors border-b border-stone-100 flex items-center justify-between gap-3" do %>
+        <span>Chats</span>
+        <%= render "shared/chat_badge",
+              count: @unread_chats_count,
+              badge_id: "mobile_chat_badge",
+              badge_classes: "min-w-5 h-5 items-center justify-center rounded-full bg-stone-900 px-1.5 text-[11px] font-semibold text-white" %>
       <% end %>
-      <%= link_to "Notifications", notifications_path,
-            class: "block py-3 text-stone-700 hover:text-rose-600 transition-colors border-b border-stone-100" %>
+      <%= link_to notifications_path,
+            class: "py-3 text-stone-700 hover:text-rose-600 transition-colors border-b border-stone-100 flex items-center justify-between gap-3" do %>
+        <span>Notifications</span>
+        <%= render "shared/notifications_badge",
+              count: @unread_notifications_count,
+              badge_id: "mobile_notifications_badge",
+              badge_classes: "min-w-5 h-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-semibold text-white" %>
+      <% end %>
       <%= link_to "Profile", user_path(current_user),
             class: "block py-3 text-stone-700 hover:text-rose-600 transition-colors border-b border-stone-100" %>
       <%= link_to "Settings", edit_user_registration_path,

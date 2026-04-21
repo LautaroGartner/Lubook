@@ -93,13 +93,13 @@ RSpec.describe User, type: :model do
 
   describe "#active_now?" do
     it "is true when the user has been active recently" do
-      user = create(:user, last_active_at: 2.minutes.ago)
+      user = create(:user, last_active_at: 20.seconds.ago)
 
       expect(user.active_now?).to be(true)
     end
 
     it "is false when the user has been inactive for a while" do
-      user = create(:user, last_active_at: 10.minutes.ago)
+      user = create(:user, last_active_at: 2.minutes.ago)
 
       expect(user.active_now?).to be(false)
     end

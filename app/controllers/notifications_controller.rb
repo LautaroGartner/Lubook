@@ -14,6 +14,24 @@ class NotificationsController < ApplicationController
         "notifications_badge",
         partial: "shared/notifications_badge",
         locals: { count: current_user.unread_notifications_count }
+      ),
+      turbo_stream.replace(
+        "mobile_notifications_badge",
+        partial: "shared/notifications_badge",
+        locals: {
+          count: current_user.unread_notifications_count,
+          badge_id: "mobile_notifications_badge",
+          badge_classes: "min-w-5 h-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-semibold text-white"
+        }
+      ),
+      turbo_stream.replace(
+        "mobile_menu_notifications_badge",
+        partial: "shared/notifications_badge",
+        locals: {
+          count: current_user.unread_notifications_count,
+          badge_id: "mobile_menu_notifications_badge",
+          badge_classes: "absolute -right-1 -top-1 min-w-4 h-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold text-white"
+        }
       )
     ]
 

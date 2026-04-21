@@ -28,9 +28,12 @@
       <div class="text-sm whitespace-pre-wrap"><%= simple_format(message.body) %></div>
     <% end %>
     <div class="mt-2 flex items-center justify-between gap-3">
-      <p class="text-[11px] <%= message.user_id == current_user_id ? "text-rose-100" : "text-stone-400" %>">
+      <time datetime="<%= message.created_at.iso8601 %>"
+            data-controller="local-time"
+            data-local-time-timestamp-value="<%= message.created_at.iso8601 %>"
+            class="text-[11px] <%= message.user_id == current_user_id ? "text-rose-100" : "text-stone-400" %>">
         <%= message.created_at.strftime("%b %-d, %-I:%M %p") %>
-      </p>
+      </time>
       <button type="button"
               data-action="message-form#reply"
               data-message-id="<%= message.id %>"

@@ -46,6 +46,17 @@ class Message < ApplicationRecord
         partial: "shared/chat_badge",
         locals: { count: recipient.unread_chats_count }
       )
+
+      safe_broadcast_replace_to(
+        [ recipient, :chats ],
+        target: "mobile_chat_badge",
+        partial: "shared/chat_badge",
+        locals: {
+          count: recipient.unread_chats_count,
+          badge_id: "mobile_chat_badge",
+          badge_classes: "min-w-5 h-5 items-center justify-center rounded-full bg-stone-900 px-1.5 text-[11px] font-semibold text-white"
+        }
+      )
     end
   end
 

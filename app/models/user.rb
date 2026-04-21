@@ -76,7 +76,7 @@ class User < ApplicationRecord
   end
 
   def active_now?
-    last_active_at.present? && last_active_at >= 5.minutes.ago
+    last_active_at.present? && last_active_at >= 45.seconds.ago
   end
 
   private
