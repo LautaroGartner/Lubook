@@ -1,5 +1,5 @@
 module ApplicationHelper
-  include Pagy::Frontend
+  include Pagy::NumericHelpers
 
   MENTION_REGEX = /(^|[^A-Za-z0-9_])@([A-Za-z0-9_.]{3,30})/.freeze
 
