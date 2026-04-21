@@ -48,8 +48,9 @@ class ConversationsController < ApplicationController
   end
 
   def mark_conversation_as_read!
-    participant = @conversation.conversation_participants.find_by!(user: current_user)
-    participant.update(last_read_at: Time.current)
+    @conversation.conversation_participants
+                 .where(user: current_user)
+                 .update_all(last_read_at: Time.current, updated_at: Time.current)
 
     Turbo::StreamsChannel.broadcast_replace_to(
       [ current_user, :chats ],

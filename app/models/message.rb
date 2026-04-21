@@ -22,7 +22,9 @@ class Message < ApplicationRecord
   end
 
   def mark_sender_as_read!
-    conversation.conversation_participants.find_by(user_id: user_id)&.update(last_read_at: created_at)
+    conversation.conversation_participants
+                .where(user_id: user_id)
+                .update_all(last_read_at: created_at, updated_at: Time.current)
   end
 
   def broadcast_to_other_participants!
