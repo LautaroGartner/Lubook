@@ -36,18 +36,24 @@ module ApplicationHelper
   end
 
   def chat_read_receipt_text(conversation, current_user, other_participant)
+    return unless chat_read_receipt_message_id(conversation, current_user, other_participant)
+
+    other_state = conversation.participant_for(other_participant)
+    return unless other_state&.last_read_at.present?
+
+    "Seen #{time_ago_in_words(other_state.last_read_at)} ago"
+  end
+
+  def chat_read_receipt_message_id(conversation, current_user, other_participant)
     return unless other_participant&.share_read_receipts?
 
     other_state = conversation.participant_for(other_participant)
     return unless other_state&.last_read_at.present?
 
-    last_read_outgoing_message = conversation.messages
-                                            .where(user: current_user)
-                                            .where("created_at <= ?", other_state.last_read_at)
-                                            .order(created_at: :desc)
-                                            .first
-    return unless last_read_outgoing_message.present?
-
-    "Seen #{time_ago_in_words(other_state.last_read_at)} ago"
+    conversation.messages
+                .where(user: current_user)
+                .where("created_at <= ?", other_state.last_read_at)
+                .order(created_at: :desc)
+                .pick(:id)
   end
 end

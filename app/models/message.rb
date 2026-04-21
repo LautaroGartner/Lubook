@@ -33,7 +33,14 @@ class Message < ApplicationRecord
         [ conversation, recipient ],
         target: "conversation_messages",
         partial: "messages/message",
-        locals: { message: self, current_user_id: recipient.id }
+        locals: {
+          message: self,
+          current_user_id: recipient.id,
+          conversation: conversation,
+          current_user: recipient,
+          other_participant: conversation.other_participant_for(recipient),
+          read_receipt_message_id: ApplicationController.helpers.chat_read_receipt_message_id(conversation, recipient, conversation.other_participant_for(recipient))
+        }
       )
     end
   end
@@ -64,12 +71,13 @@ class Message < ApplicationRecord
     conversation.participants.each do |participant|
       safe_broadcast_replace_to(
         [ conversation, participant ],
-        target: "chat_read_state",
-        partial: "conversations/read_state",
+        target: "conversation_messages",
+        partial: "conversations/messages",
         locals: {
           conversation: conversation,
           current_user: participant,
-          other_participant: conversation.other_participant_for(participant)
+          other_participant: conversation.other_participant_for(participant),
+          messages: conversation.messages.includes(:user, :reply_to_message).order(:created_at)
         }
       )
     end

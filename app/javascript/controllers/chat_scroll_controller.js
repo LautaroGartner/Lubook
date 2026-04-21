@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { Turbo } from "@hotwired/turbo-rails"
 
 export default class extends Controller {
   static values = { readUrl: String }
@@ -21,16 +22,20 @@ export default class extends Controller {
     this.element.scrollTop = this.element.scrollHeight
   }
 
-  markRead() {
+  async markRead() {
     if (!this.hasReadUrlValue) return
 
-    fetch(this.readUrlValue, {
+    const response = await fetch(this.readUrlValue, {
       method: "PATCH",
       credentials: "same-origin",
       headers: {
         "X-CSRF-Token": document.querySelector("meta[name='csrf-token']")?.content,
-        "Accept": "text/vnd.turbo-stream.html, text/html, application/xhtml+xml"
+        "Accept": "text/vnd.turbo-stream.html"
       }
     })
+
+    if (!response.ok) return
+
+    Turbo.renderStreamMessage(await response.text())
   }
 }

@@ -11,6 +11,20 @@ class NotificationsController < ApplicationController
 
     streams = [
       turbo_stream.replace(
+        "chat_badge",
+        partial: "shared/chat_badge",
+        locals: { count: current_user.unread_chats_count }
+      ),
+      turbo_stream.replace(
+        "mobile_chat_badge",
+        partial: "shared/chat_badge",
+        locals: {
+          count: current_user.unread_chats_count,
+          badge_id: "mobile_chat_badge",
+          badge_classes: "min-w-5 h-5 items-center justify-center rounded-full bg-stone-900 px-1.5 text-[11px] font-semibold text-white"
+        }
+      ),
+      turbo_stream.replace(
         "notifications_badge",
         partial: "shared/notifications_badge",
         locals: { count: current_user.unread_notifications_count }

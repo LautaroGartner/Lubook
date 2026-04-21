@@ -29,7 +29,22 @@ class ConversationsController < ApplicationController
 
   def read
     mark_conversation_as_read!
-    head :ok
+    render turbo_stream: [
+      turbo_stream.replace(
+        "chat_badge",
+        partial: "shared/chat_badge",
+        locals: { count: current_user.unread_chats_count }
+      ),
+      turbo_stream.replace(
+        "mobile_chat_badge",
+        partial: "shared/chat_badge",
+        locals: {
+          count: current_user.unread_chats_count,
+          badge_id: "mobile_chat_badge",
+          badge_classes: "min-w-5 h-5 items-center justify-center rounded-full bg-stone-900 px-1.5 text-[11px] font-semibold text-white"
+        }
+      )
+    ]
   end
 
   def presence
@@ -83,12 +98,13 @@ class ConversationsController < ApplicationController
     @conversation.participants.where.not(id: current_user.id).each do |viewer|
       safe_broadcast_replace_to(
         [ @conversation, viewer ],
-        target: "chat_read_state",
-        partial: "conversations/read_state",
+        target: "conversation_messages",
+        partial: "conversations/messages",
         locals: {
           conversation: @conversation,
           current_user: viewer,
-          other_participant: @conversation.other_participant_for(viewer)
+          other_participant: @conversation.other_participant_for(viewer),
+          messages: @conversation.messages.includes(:user, :reply_to_message).order(:created_at)
         }
       )
     end

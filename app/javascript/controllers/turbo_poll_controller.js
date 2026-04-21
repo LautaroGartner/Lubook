@@ -4,7 +4,7 @@ import { Turbo } from "@hotwired/turbo-rails"
 export default class extends Controller {
   static values = {
     url: String,
-    interval: { type: Number, default: 15000 }
+    interval: { type: Number, default: 5000 }
   }
 
   connect() {

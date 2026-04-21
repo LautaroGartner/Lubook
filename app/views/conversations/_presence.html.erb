@@ -2,7 +2,7 @@
      class="mt-2 text-sm"
      data-controller="turbo-poll"
      data-turbo-poll-url-value="<%= presence_conversation_path(conversation) %>"
-     data-turbo-poll-interval-value="20000">
+     data-turbo-poll-interval-value="10000">
   <% if (presence_text = chat_presence_text(other_participant)).present? %>
     <p class="inline-flex items-center gap-2 font-medium text-stone-700">
       <span class="inline-flex h-2.5 w-2.5 rounded-full <%= other_participant.active_now? ? "bg-green-500" : "bg-stone-300" %>"></span>

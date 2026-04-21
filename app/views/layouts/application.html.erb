@@ -26,7 +26,7 @@
         <% if user_signed_in? %>
           data-controller="turbo-poll"
           data-turbo-poll-url-value="<%= live_notifications_path(include_list: controller_name == "notifications") %>"
-          data-turbo-poll-interval-value="15000"
+          data-turbo-poll-interval-value="5000"
         <% end %>>
     <% if user_signed_in? %>
       <%= turbo_stream_from [current_user, :notifications] %>

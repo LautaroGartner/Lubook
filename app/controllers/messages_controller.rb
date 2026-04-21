@@ -11,7 +11,14 @@ class MessagesController < ApplicationController
             turbo_stream.append(
               "conversation_messages",
               partial: "messages/message",
-              locals: { message: @message, current_user_id: current_user.id }
+              locals: {
+                message: @message,
+                current_user_id: current_user.id,
+                conversation: @conversation,
+                current_user: current_user,
+                other_participant: @conversation.other_participant_for(current_user),
+                read_receipt_message_id: helpers.chat_read_receipt_message_id(@conversation, current_user, @conversation.other_participant_for(current_user))
+              }
             ),
             turbo_stream.replace(
               "message_form",

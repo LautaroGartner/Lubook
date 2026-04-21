@@ -22,15 +22,10 @@
   </header>
 
   <%= turbo_stream_from [@conversation, current_user] %>
-  <div id="conversation_messages"
-       data-controller="chat-scroll"
-       data-chat-scroll-read-url-value="<%= read_conversation_path(@conversation) %>"
-       class="flex-1 px-6 py-5 space-y-4 bg-stone-50/60 max-h-[32rem] overflow-y-auto">
-    <% @messages.each do |message| %>
-      <%= render "messages/message", message: message, current_user_id: current_user.id %>
-    <% end %>
-  </div>
-
-  <%= render "conversations/read_state", conversation: @conversation, current_user: current_user, other_participant: @other_participant %>
+  <%= render "conversations/messages",
+        conversation: @conversation,
+        messages: @messages,
+        current_user: current_user,
+        other_participant: @other_participant %>
   <%= render "messages/form", conversation: @conversation, message: @message %>
 </section>
