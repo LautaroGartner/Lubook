@@ -52,7 +52,7 @@ class ConversationsController < ApplicationController
                  .where(user: current_user)
                  .update_all(last_read_at: Time.current, updated_at: Time.current)
 
-    Turbo::StreamsChannel.broadcast_replace_to(
+    safe_broadcast_replace_to(
       [ current_user, :chats ],
       target: "chat_badge",
       partial: "shared/chat_badge",
@@ -60,7 +60,7 @@ class ConversationsController < ApplicationController
     )
 
     @conversation.participants.where.not(id: current_user.id).each do |viewer|
-      Turbo::StreamsChannel.broadcast_replace_to(
+      safe_broadcast_replace_to(
         [ @conversation, viewer ],
         target: "chat_read_state",
         partial: "conversations/read_state",
@@ -71,5 +71,11 @@ class ConversationsController < ApplicationController
         }
       )
     end
+  end
+
+  def safe_broadcast_replace_to(*streamables, **options)
+    Turbo::StreamsChannel.broadcast_replace_to(*streamables, **options)
+  rescue ArgumentError => error
+    Rails.logger.warn("[Turbo broadcast skipped] #{error.class}: #{error.message}")
   end
 end

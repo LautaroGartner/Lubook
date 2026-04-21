@@ -29,16 +29,18 @@ class Message < ApplicationRecord
 
   def broadcast_to_other_participants!
     conversation.participants.where.not(id: user_id).each do |recipient|
-      broadcast_append_to [ conversation, recipient ],
-                          target: "conversation_messages",
-                          partial: "messages/message",
-                          locals: { message: self, current_user_id: recipient.id }
+      safe_broadcast_append_to(
+        [ conversation, recipient ],
+        target: "conversation_messages",
+        partial: "messages/message",
+        locals: { message: self, current_user_id: recipient.id }
+      )
     end
   end
 
   def broadcast_chat_badges!
     conversation.participants.where.not(id: user_id).each do |recipient|
-      Turbo::StreamsChannel.broadcast_replace_to(
+      safe_broadcast_replace_to(
         [ recipient, :chats ],
         target: "chat_badge",
         partial: "shared/chat_badge",
@@ -49,7 +51,7 @@ class Message < ApplicationRecord
 
   def broadcast_read_states!
     conversation.participants.each do |participant|
-      Turbo::StreamsChannel.broadcast_replace_to(
+      safe_broadcast_replace_to(
         [ conversation, participant ],
         target: "chat_read_state",
         partial: "conversations/read_state",
@@ -60,6 +62,18 @@ class Message < ApplicationRecord
         }
       )
     end
+  end
+
+  def safe_broadcast_append_to(*streamables, **options)
+    broadcast_append_to(*streamables, **options)
+  rescue ArgumentError => error
+    Rails.logger.warn("[Turbo broadcast skipped] #{error.class}: #{error.message}")
+  end
+
+  def safe_broadcast_replace_to(*streamables, **options)
+    Turbo::StreamsChannel.broadcast_replace_to(*streamables, **options)
+  rescue ArgumentError => error
+    Rails.logger.warn("[Turbo broadcast skipped] #{error.class}: #{error.message}")
   end
 
   def body_or_image_present

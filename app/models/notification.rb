@@ -70,18 +70,24 @@ class Notification < ApplicationRecord
   end
 
   def broadcast_updates!
-    Turbo::StreamsChannel.broadcast_replace_to(
+    safe_broadcast_replace_to(
       [ recipient, :notifications ],
       target: "notifications_list_container",
       partial: "notifications/list",
       locals: { notifications: recipient.notifications.where.not(action: "message").recent }
     )
 
-    Turbo::StreamsChannel.broadcast_replace_to(
+    safe_broadcast_replace_to(
       [ recipient, :notifications ],
       target: "notifications_badge",
       partial: "shared/notifications_badge",
       locals: { count: recipient.unread_notifications_count }
     )
+  end
+
+  def safe_broadcast_replace_to(*streamables, **options)
+    Turbo::StreamsChannel.broadcast_replace_to(*streamables, **options)
+  rescue ArgumentError => error
+    Rails.logger.warn("[Turbo broadcast skipped] #{error.class}: #{error.message}")
   end
 end
