@@ -39,12 +39,11 @@ class NotificationsController < ApplicationController
         }
       ),
       turbo_stream.replace(
-        "mobile_menu_notifications_badge",
-        partial: "shared/notifications_badge",
+        "mobile_menu_badge",
+        partial: "shared/menu_badge",
         locals: {
-          count: current_user.unread_notifications_count,
-          badge_id: "mobile_menu_notifications_badge",
-          badge_classes: "absolute -right-1 -top-1 min-w-4 h-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold text-white"
+          notifications_count: current_user.unread_notifications_count,
+          chats_count: current_user.unread_chats_count
         }
       )
     ]

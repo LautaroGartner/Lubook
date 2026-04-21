@@ -63,10 +63,9 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
-      <%= render "shared/notifications_badge",
-            count: @unread_notifications_count,
-            badge_id: "mobile_menu_notifications_badge",
-            badge_classes: "absolute -right-1 -top-1 min-w-4 h-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold text-white" %>
+      <%= render "shared/menu_badge",
+            notifications_count: @unread_notifications_count,
+            chats_count: @unread_chats_count %>
     </button>
   </div>
 

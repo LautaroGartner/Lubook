@@ -10,7 +10,14 @@ Rails.application.routes.draw do
 
       get :me, to: "users#show"
       get :feed, to: "feed#index"
-      resources :posts, only: [ :show ]
+      resources :posts, only: [ :show, :create ] do
+        resources :comments, only: [ :create ]
+        resource :like, only: [ :create, :destroy ], module: :posts
+      end
+
+      resources :comments, only: [] do
+        resource :like, only: [ :create, :destroy ], module: :comments
+      end
     end
   end
 

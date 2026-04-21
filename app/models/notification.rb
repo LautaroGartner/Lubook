@@ -97,12 +97,11 @@ class Notification < ApplicationRecord
 
     safe_broadcast_replace_to(
       [ recipient, :notifications ],
-      target: "mobile_menu_notifications_badge",
-      partial: "shared/notifications_badge",
+      target: "mobile_menu_badge",
+      partial: "shared/menu_badge",
       locals: {
-        count: recipient.unread_notifications_count,
-        badge_id: "mobile_menu_notifications_badge",
-        badge_classes: "absolute -right-1 -top-1 min-w-4 h-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold text-white"
+        notifications_count: recipient.unread_notifications_count,
+        chats_count: recipient.unread_chats_count
       }
     )
   end

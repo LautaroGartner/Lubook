@@ -64,6 +64,16 @@ class Message < ApplicationRecord
           badge_classes: "min-w-5 h-5 items-center justify-center rounded-full bg-stone-900 px-1.5 text-[11px] font-semibold text-white"
         }
       )
+
+      safe_broadcast_replace_to(
+        [ recipient, :chats ],
+        target: "mobile_menu_badge",
+        partial: "shared/menu_badge",
+        locals: {
+          notifications_count: recipient.unread_notifications_count,
+          chats_count: recipient.unread_chats_count
+        }
+      )
     end
   end
 

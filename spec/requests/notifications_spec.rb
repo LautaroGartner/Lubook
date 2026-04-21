@@ -25,7 +25,7 @@ RSpec.describe "Notifications", type: :request do
       expect(response.media_type).to eq("text/vnd.turbo-stream.html")
       expect(response.body).to include("notifications_badge")
       expect(response.body).to include("mobile_notifications_badge")
-      expect(response.body).to include("mobile_menu_notifications_badge")
+      expect(response.body).to include("mobile_menu_badge")
     end
 
     it "updates the notifications list when requested" do

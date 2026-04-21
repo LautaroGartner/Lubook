@@ -1,0 +1,4 @@
+<% total = notifications_count.to_i + chats_count.to_i %>
+<span id="mobile_menu_badge" class="<%= total.positive? ? "inline-flex" : "hidden" %> absolute -right-1 -top-1 min-w-4 h-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold text-white">
+  <%= total %>
+</span>
