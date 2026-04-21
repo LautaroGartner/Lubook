@@ -1,5 +1,5 @@
 class ConversationsController < ApplicationController
-  before_action :set_conversation, only: [ :show, :read ]
+  before_action :set_conversation, only: [ :show, :read, :presence ]
 
   def index
     @conversations = current_user.conversations
@@ -30,6 +30,16 @@ class ConversationsController < ApplicationController
   def read
     mark_conversation_as_read!
     head :ok
+  end
+
+  def presence
+    @other_participant = @conversation.other_participant_for(current_user)
+
+    render turbo_stream: turbo_stream.replace(
+      "conversation_presence",
+      partial: "conversations/presence",
+      locals: { other_participant: @other_participant, conversation: @conversation }
+    )
   end
 
   private

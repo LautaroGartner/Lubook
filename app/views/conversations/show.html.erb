@@ -12,7 +12,7 @@
           <%= @other_participant&.profile&.display_name.presence || @other_participant&.username %>
         </h2>
         <p class="text-sm text-stone-500">@<%= @other_participant&.username %></p>
-        <%= render "conversations/presence", other_participant: @other_participant %>
+        <%= render "conversations/presence", other_participant: @other_participant, conversation: @conversation %>
       </div>
       <% if @other_participant %>
         <%= link_to "View profile", user_path(@other_participant),

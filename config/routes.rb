@@ -18,6 +18,7 @@ Rails.application.routes.draw do
 
   resources :conversations, only: [ :index, :show, :create ] do
     member do
+      get :presence
       patch :read
     end
     resources :messages, only: :create
@@ -25,6 +26,7 @@ Rails.application.routes.draw do
 
   resources :notifications, only: [ :index, :destroy ] do
     collection do
+      get :live
       delete :clear
     end
   end

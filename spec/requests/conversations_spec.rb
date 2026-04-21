@@ -41,4 +41,18 @@ RSpec.describe "Conversations", type: :request do
       expect(response.body).not_to include("Find someone to message")
     end
   end
+
+  describe "GET /conversations/:id/presence" do
+    it "renders a turbo stream update for chat presence" do
+      conversation = Conversation.create!
+      create(:conversation_participant, conversation: conversation, user: user)
+      create(:conversation_participant, conversation: conversation, user: connected_user)
+
+      get presence_conversation_path(conversation), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      expect(response.body).to include("conversation_presence")
+    end
+  end
 end

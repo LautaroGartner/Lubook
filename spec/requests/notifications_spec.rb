@@ -15,6 +15,26 @@ RSpec.describe "Notifications", type: :request do
     end
   end
 
+  describe "GET /notifications/live" do
+    it "renders a turbo stream update for the notifications badge" do
+      create(:notification, recipient: user)
+
+      get live_notifications_path, headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      expect(response.body).to include("notifications_badge")
+    end
+
+    it "updates the notifications list when requested" do
+      create(:notification, recipient: user)
+
+      get live_notifications_path(include_list: true), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
+
+      expect(response.body).to include("notifications_list_container")
+    end
+  end
+
   describe "DELETE /notifications/clear" do
     it "clears all notifications for the current user" do
       create_list(:notification, 2, recipient: user)
