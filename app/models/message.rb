@@ -28,7 +28,7 @@ class Message < ApplicationRecord
   end
 
   def broadcast_to_other_participants!
-    conversation.participants.where.not(id: user_id).find_each do |recipient|
+    conversation.participants.where.not(id: user_id).each do |recipient|
       broadcast_append_to [ conversation, recipient ],
                           target: "conversation_messages",
                           partial: "messages/message",
@@ -37,7 +37,7 @@ class Message < ApplicationRecord
   end
 
   def broadcast_chat_badges!
-    conversation.participants.where.not(id: user_id).find_each do |recipient|
+    conversation.participants.where.not(id: user_id).each do |recipient|
       Turbo::StreamsChannel.broadcast_replace_to(
         [ recipient, :chats ],
         target: "chat_badge",
@@ -48,7 +48,7 @@ class Message < ApplicationRecord
   end
 
   def broadcast_read_states!
-    conversation.participants.find_each do |participant|
+    conversation.participants.each do |participant|
       Turbo::StreamsChannel.broadcast_replace_to(
         [ conversation, participant ],
         target: "chat_read_state",

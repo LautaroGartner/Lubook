@@ -70,14 +70,18 @@ class Notification < ApplicationRecord
   end
 
   def broadcast_updates!
-    broadcast_replace_to [ recipient, :notifications ],
-                         target: "notifications_list_container",
-                         partial: "notifications/list",
-                         locals: { notifications: recipient.notifications.where.not(action: "message").recent }
+    Turbo::StreamsChannel.broadcast_replace_to(
+      [ recipient, :notifications ],
+      target: "notifications_list_container",
+      partial: "notifications/list",
+      locals: { notifications: recipient.notifications.where.not(action: "message").recent }
+    )
 
-    broadcast_replace_to [ recipient, :notifications ],
-                         target: "notifications_badge",
-                         partial: "shared/notifications_badge",
-                         locals: { count: recipient.unread_notifications_count }
+    Turbo::StreamsChannel.broadcast_replace_to(
+      [ recipient, :notifications ],
+      target: "notifications_badge",
+      partial: "shared/notifications_badge",
+      locals: { count: recipient.unread_notifications_count }
+    )
   end
 end

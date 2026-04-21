@@ -59,7 +59,7 @@ class ConversationsController < ApplicationController
       locals: { count: current_user.unread_chats_count }
     )
 
-    @conversation.participants.where.not(id: current_user.id).find_each do |viewer|
+    @conversation.participants.where.not(id: current_user.id).each do |viewer|
       Turbo::StreamsChannel.broadcast_replace_to(
         [ @conversation, viewer ],
         target: "chat_read_state",
