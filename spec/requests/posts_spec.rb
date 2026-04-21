@@ -61,6 +61,13 @@ it "creates a post with valid params when signed in" do
       expect { delete post_path(post_record) }.to change(Post, :count).by(-1)
     end
 
+    it "redirects turbo delete back to the feed instead of the deleted post" do
+      sign_in user
+      delete post_path(post_record), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
+
+      expect(response).to redirect_to(root_path)
+    end
+
     it "forbids other users from deleting" do
       sign_in other_user
       expect { delete post_path(post_record) }.not_to change(Post, :count)

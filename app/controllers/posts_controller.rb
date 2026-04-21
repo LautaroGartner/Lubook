@@ -33,7 +33,10 @@ class PostsController < ApplicationController
   def destroy
     authorize @post
     @post.destroy
-    redirect_back(fallback_location: root_path, notice: "Post deleted.")
+    respond_to do |format|
+      format.turbo_stream { redirect_to root_path, notice: "Post deleted." }
+      format.html { redirect_back fallback_location: root_path, notice: "Post deleted." }
+    end
   end
 
   private

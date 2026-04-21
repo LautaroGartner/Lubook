@@ -18,7 +18,8 @@
                   <p class="text-sm font-semibold text-stone-900 truncate"><%= user.profile&.display_name.presence || user.username %></p>
                   <p class="text-xs text-stone-500 truncate">@<%= user.username %></p>
                 </div>
-                <%= button_to "Message", conversations_path(user_id: user.id),
+                <%= link_to "Message", conversations_path(user_id: user.id),
+                      data: { turbo_method: :post },
                       class: "px-3 py-1.5 text-sm bg-stone-900 text-white rounded-full hover:bg-stone-800 transition-colors" %>
               </div>
             <% end %>

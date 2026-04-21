@@ -19,6 +19,16 @@ RSpec.describe "Conversations", type: :request do
     end
   end
 
+  describe "POST /conversations" do
+    it "starts or reuses a conversation and redirects to it" do
+      post conversations_path, params: { user_id: connected_user.id }
+
+      conversation = Conversation.last
+      expect(response).to redirect_to(conversation_path(conversation))
+      expect(conversation.participants).to include(user, connected_user)
+    end
+  end
+
   describe "GET /conversations/:id" do
     it "shows the active chat without the finder panel" do
       conversation = Conversation.create!
