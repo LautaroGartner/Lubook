@@ -1,0 +1,14 @@
+<div id="notifications_list_container">
+  <div id="notifications_list" class="<%= notifications.any? ? "divide-y divide-stone-100" : "" %>">
+    <% if notifications.any? %>
+      <% notifications.each do |notification| %>
+        <%= render "notifications/notification", notification: notification %>
+      <% end %>
+    <% else %>
+      <div class="px-6 py-12 text-center text-stone-500">
+        <p class="text-lg font-serif text-stone-700">Nothing yet.</p>
+        <p class="mt-2 text-sm">When your friends interact with you, it’ll show up here.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

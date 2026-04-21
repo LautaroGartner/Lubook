@@ -1,15 +1,17 @@
-<div class="flex items-start gap-3 pb-4 border-b border-stone-100 last:border-0" id="<%= dom_id(comment) %>">
+<div id="<%= dom_id(comment) %>" data-controller="comment-thread" class="rounded-2xl <%= depth.to_i.zero? ? "bg-white" : "bg-stone-50 border border-stone-200" %> px-0 <%= depth.to_i.zero? ? "pb-4 border-b border-stone-100 last:border-0" : "px-4 py-3" %>">
+  <div class="flex items-start gap-3">
   <% if comment.user.profile&.avatar&.attached? %>
     <%= link_to user_path(comment.user), class: "flex-shrink-0" do %>
       <%= image_tag comment.user.profile.avatar.variant(resize_to_fill: [64, 64]),
-            class: "w-8 h-8 rounded-full object-cover" %>
+            class: "w-9 h-9 rounded-full object-cover ring-1 ring-stone-200" %>
     <% end %>
   <% else %>
-    <div class="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-xs text-stone-600 font-semibold flex-shrink-0">
+    <div class="w-9 h-9 rounded-full bg-stone-200 flex items-center justify-center text-xs text-stone-600 font-semibold flex-shrink-0">
       <%= comment.user.username.first.upcase %>
     </div>
   <% end %>
   <div class="flex-1 min-w-0">
+    <% thread_expanded = local_assigns.fetch(:expanded_thread_ids, []).include?(comment.thread_root_id) %>
     <div class="flex items-center gap-2 text-sm">
       <%= link_to comment.user.username, user_path(comment.user),
             class: "font-semibold hover:underline" %>
@@ -19,29 +21,42 @@
         <%= time_ago_in_words(comment.created_at) %> ago
       </time>
     </div>
-    <p class="text-stone-800 mt-1 whitespace-pre-wrap"><%= simple_format(comment.body) %></p>
+    <div class="comment-copy text-stone-800 mt-1 leading-relaxed"><%= comment_body_html(comment.body) %></div>
 
-    <div class="flex items-center gap-3 mt-2 text-xs text-stone-500">
+    <div class="flex items-center gap-4 mt-3 text-xs text-stone-500">
       <% if comment.liked_by?(current_user) %>
         <%= button_to comment_like_path(comment), method: :delete,
-              class: "text-rose-600 hover:text-rose-700 hover:scale-110 transition-all no-underline #{"animate-heart-pop" if local_assigns[:just_liked]}",
+              params: (thread_expanded ? { expanded_thread_ids: [ comment.thread_root_id ] } : {}),
+              class: "text-rose-600 hover:text-rose-700 transition-all no-underline font-medium #{"animate-heart-pop" if local_assigns[:just_liked]}",
               form: { class: "inline" } do %>
           ♥ <%= comment.likes.size %>
         <% end %>
       <% else %>
         <%= button_to comment_like_path(comment), method: :post,
-              class: "text-stone-500 hover:text-rose-600 hover:scale-110 transition-all no-underline",
+              params: (thread_expanded ? { expanded_thread_ids: [ comment.thread_root_id ] } : {}),
+              class: "text-stone-500 hover:text-rose-600 transition-all no-underline font-medium",
               form: { class: "inline" } do %>
           ♡ <%= comment.likes.size %>
         <% end %>
       <% end %>
 
+      <button type="button"
+            data-action="comment-thread#toggleReply"
+            class="cursor-pointer text-stone-400 hover:text-stone-700 transition-colors font-medium">
+        Reply
+      </button>
+
       <% if policy(comment).destroy? %>
         <%= button_to "Delete", comment_path(comment), method: :delete,
               data: { turbo_confirm: "Delete this comment?" },
-              class: "text-stone-400 hover:text-rose-600 transition-colors",
+              class: "text-stone-400 hover:text-rose-600 transition-colors font-medium",
               form: { class: "inline" } %>
       <% end %>
     </div>
+
+    <div data-comment-thread-target="replyForm" class="hidden mt-4 max-w-xl">
+      <%= render "comments/reply_form", post: post, parent: comment, comment: Comment.new %>
+    </div>
+  </div>
   </div>
 </div>

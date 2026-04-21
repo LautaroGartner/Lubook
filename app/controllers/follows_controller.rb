@@ -30,18 +30,26 @@ class FollowsController < ApplicationController
   def accept
     authorize @follow
     @follow.update!(status: :accepted)
-    redirect_back(fallback_location: users_path, notice: "Follow request accepted.")
+    clear_notification_if_requested
+    redirect_back(fallback_location: notifications_path, notice: "Follow request accepted.")
   end
 
   def reject
     authorize @follow
     @follow.destroy
-    redirect_back(fallback_location: users_path, notice: "Follow request rejected.")
+    clear_notification_if_requested
+    redirect_back(fallback_location: notifications_path, notice: "Follow request rejected.")
   end
 
   private
 
   def set_follow
     @follow = Follow.find(params[:id])
+  end
+
+  def clear_notification_if_requested
+    return if params[:notification_id].blank?
+
+    current_user.notifications.where(id: params[:notification_id]).delete_all
   end
 end

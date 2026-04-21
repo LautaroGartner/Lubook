@@ -1,0 +1,8 @@
+<div class="flex <%= message.user_id == current_user_id ? "justify-end" : "justify-start" %>">
+  <div class="max-w-[85%] rounded-2xl px-4 py-3 <%= message.user_id == current_user_id ? "bg-rose-500 text-white" : "bg-white border border-stone-200 text-stone-800" %>">
+    <div class="text-sm whitespace-pre-wrap"><%= simple_format(message.body) %></div>
+    <p class="mt-2 text-[11px] <%= message.user_id == current_user_id ? "text-rose-100" : "text-stone-400" %>">
+      <%= message.created_at.strftime("%b %-d, %-I:%M %p") %>
+    </p>
+  </div>
+</div>

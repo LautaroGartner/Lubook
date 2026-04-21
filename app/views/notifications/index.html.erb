@@ -1,0 +1,17 @@
+<% content_for :title, "Notifications" %>
+
+<div class="bg-white border border-stone-200 rounded-xl overflow-hidden">
+  <div class="px-6 py-4 border-b border-stone-200 flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-serif font-semibold text-stone-900">Notifications</h1>
+      <p class="text-sm text-stone-500">See who’s replying, liking, messaging, and following.</p>
+    </div>
+    <% if @notifications.any? %>
+      <%= button_to "Clear all", clear_notifications_path, method: :delete,
+            data: { turbo_confirm: "Clear all notifications?" },
+            class: "px-4 py-2 text-sm border border-stone-300 rounded-full hover:bg-stone-100 transition-colors" %>
+    <% end %>
+  </div>
+
+  <%= render "notifications/list", notifications: @notifications %>
+</div>

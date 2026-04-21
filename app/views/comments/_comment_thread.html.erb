@@ -1,0 +1,36 @@
+<%= render "comments/comment", comment: comment, post: post, depth: 0 %>
+
+<% thread_replies = all_comments.reject { |item| item.parent_id.nil? }.select { |reply| reply.thread_root_id == comment.id } %>
+<% if thread_replies.any? %>
+  <% visible_replies = thread_replies.first(2) %>
+  <% hidden_replies = thread_replies.drop(2) %>
+  <% expanded = local_assigns.fetch(:expanded_thread_ids, []).include?(comment.id) %>
+
+  <div class="mt-3 space-y-3 ml-11">
+    <% visible_replies.each do |reply| %>
+      <%= render "comments/comment", comment: reply, post: post, depth: 1, expanded_thread_ids: local_assigns.fetch(:expanded_thread_ids, []) %>
+    <% end %>
+
+    <% if hidden_replies.any? %>
+      <div data-controller="comment-thread">
+        <button type="button"
+              data-action="comment-thread#expandReplies"
+              data-comment-thread-target="showRepliesButton"
+              class="<%= expanded ? "hidden " : "" %>cursor-pointer text-xs font-medium text-stone-400 hover:text-stone-700 transition-colors">
+          View <%= hidden_replies.size %> more <%= "reply".pluralize(hidden_replies.size) %>
+        </button>
+        <div data-comment-thread-target="hiddenReplies" class="<%= expanded ? "" : "hidden " %>mt-3 space-y-3">
+          <% hidden_replies.each do |reply| %>
+            <%= render "comments/comment", comment: reply, post: post, depth: 1, expanded_thread_ids: local_assigns.fetch(:expanded_thread_ids, []) %>
+          <% end %>
+          <button type="button"
+                data-action="comment-thread#collapseReplies"
+                data-comment-thread-target="hideRepliesButton"
+                class="<%= expanded ? "" : "hidden " %>cursor-pointer text-xs font-medium text-stone-400 hover:text-stone-700 transition-colors">
+            Hide replies
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

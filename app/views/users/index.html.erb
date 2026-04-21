@@ -29,16 +29,20 @@
           <% end %>
         </div>
 
-        <div>
+        <div class="flex flex-wrap items-center justify-end gap-2">
+          <% if current_user.connected_with?(user) %>
+            <%= button_to "Message", conversations_path(user_id: user.id),
+                  class: "px-3 py-1 text-sm bg-stone-900 text-white rounded-full hover:bg-stone-800 transition-colors" %>
+          <% end %>
           <% if follow.nil? %>
             <%= button_to "Follow", follows_path(receiver_id: user.id),
-                  class: "px-3 py-1 text-sm bg-rose-500 text-white rounded hover:bg-rose-600 transition-colors" %>
+                  class: "px-3 py-1 text-sm bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors" %>
           <% elsif follow.pending? %>
             <%= button_to "Cancel request", follow_path(follow), method: :delete,
-                  class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
+                  class: "px-3 py-1 text-sm border border-stone-300 rounded-full hover:bg-stone-100" %>
           <% elsif follow.accepted? %>
             <%= button_to "Unfollow", follow_path(follow), method: :delete,
-                  class: "px-3 py-1 text-sm border border-stone-300 rounded hover:bg-stone-100" %>
+                  class: "px-3 py-1 text-sm border border-stone-300 rounded-full hover:bg-stone-100" %>
           <% end %>
         </div>
       </div>

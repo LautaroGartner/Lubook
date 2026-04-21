@@ -1,0 +1,12 @@
+<%= form_with model: comment, url: post_comments_path(post), class: "space-y-2" do |f| %>
+  <%= f.hidden_field :parent_id, value: parent.thread_root_id %>
+  <%= f.hidden_field :reply_target_user_id, value: parent.user_id %>
+  <%= hidden_field_tag "expanded_thread_ids[]", parent.thread_root_id %>
+  <%= f.text_area :body, rows: 2, placeholder: "Reply to @#{parent.user.username}...",
+        value: comment.body.presence || "@#{parent.user.username} ",
+        data: { comment_thread_target: "replyInput" },
+        class: "w-full min-h-24 px-4 py-3 border border-stone-200 bg-white rounded-2xl resize-y focus:outline-none focus:ring-2 focus:ring-stone-300" %>
+  <div class="flex items-center justify-end gap-3">
+    <%= f.submit "Reply", class: "px-4 py-2 bg-stone-900 text-white rounded-full hover:bg-stone-800 transition-colors cursor-pointer text-sm font-medium" %>
+  </div>
+<% end %>

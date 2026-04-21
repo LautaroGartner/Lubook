@@ -1,21 +1,4 @@
 <% content_for :title, "Post by #{@post.user.username}" %>
 
 <%= render @post %>
-
-<div class="mt-6 bg-white border border-stone-200 rounded p-6">
-  <h2 class="text-lg font-semibold mb-4">Comments</h2>
-
-  <% if user_signed_in? %>
-    <%= render "comments/form", post: @post, comment: @comment %>
-  <% end %>
-
-  <%= turbo_frame_tag "comments" do %>
-    <div class="space-y-6">
-      <%= render @comments %>
-    </div>
-  <% end %>
-
-  <% if @comments.empty? %>
-    <p class="text-stone-500 text-sm mt-4">No comments yet. Be the first.</p>
-  <% end %>
-</div>
+<%= render "comments/section", post: @post, comments: @comments, comment: @comment %>

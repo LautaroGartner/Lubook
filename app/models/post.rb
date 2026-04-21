@@ -1,6 +1,8 @@
 class Post < ApplicationRecord
   belongs_to :user
   has_many :comments, dependent: :destroy
+  has_many :root_comments, -> { top_level.chronological.includes(:likes, user: { profile: { avatar_attachment: :blob } }) },
+           class_name: "Comment"
   has_many :likes, as: :likeable, dependent: :destroy
   has_one_attached :image
 

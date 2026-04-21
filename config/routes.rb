@@ -16,6 +16,19 @@ Rails.application.routes.draw do
     resource  :like, only: [ :create, :destroy ], module: :posts
   end
 
+  resources :conversations, only: [ :index, :show, :create ] do
+    member do
+      patch :read
+    end
+    resources :messages, only: :create
+  end
+
+  resources :notifications, only: [ :index, :destroy ] do
+    collection do
+      delete :clear
+    end
+  end
+
   resources :comments, only: [] do
     resource :like, only: [ :create, :destroy ], module: :comments
   end

@@ -33,4 +33,12 @@
   .prose-tight p + p {
     margin-top: 0.75rem;
   }
+
+  .comment-copy p {
+    margin: 0;
+  }
+
+  .comment-copy p + p {
+    margin-top: 0.5rem;
+  }
 }

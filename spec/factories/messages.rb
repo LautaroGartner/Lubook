@@ -1,8 +1,7 @@
 FactoryBot.define do
-  factory :comment do
+  factory :message do
+    conversation
     user
-    post
-    parent { nil }
     body { Faker::Lorem.sentence }
   end
 end

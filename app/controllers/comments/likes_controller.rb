@@ -18,13 +18,27 @@ class Comments::LikesController < ApplicationController
   def respond_with_like
     respond_to do |format|
       format.turbo_stream do
+        post = @comment.post
+        comments = post.comments.chronological.includes(:likes, :parent, user: { profile: { avatar_attachment: :blob } })
+
         render turbo_stream: turbo_stream.replace(
-          helpers.dom_id(@comment),
-          partial: "comments/comment",
-          locals: { comment: @comment, just_liked: action_name == "create" }
+          "post_comments_section",
+          partial: "comments/section",
+          locals: {
+            post: post,
+            comments: comments,
+            comment: Comment.new,
+            expanded_thread_ids: expanded_thread_ids
+          }
         )
       end
       format.html { redirect_back(fallback_location: post_path(@comment.post)) }
     end
+  end
+
+  def expanded_thread_ids
+    Array(params[:expanded_thread_ids]).filter_map do |value|
+      Integer(value, exception: false)
+    end.uniq
   end
 end
