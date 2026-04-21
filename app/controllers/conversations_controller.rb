@@ -1,5 +1,5 @@
 class ConversationsController < ApplicationController
-  before_action :set_conversation, only: [ :show, :read, :presence ]
+  before_action :set_conversation, only: [ :show, :read, :presence, :live ]
 
   def index
     @conversations = current_user.conversations
@@ -45,6 +45,22 @@ class ConversationsController < ApplicationController
         }
       )
     ]
+  end
+
+  def live
+    @messages = @conversation.messages.includes(:user, :reply_to_message).order(:created_at)
+    @other_participant = @conversation.other_participant_for(current_user)
+
+    render turbo_stream: turbo_stream.replace(
+      "conversation_messages",
+      partial: "conversations/messages",
+      locals: {
+        conversation: @conversation,
+        messages: @messages,
+        current_user: current_user,
+        other_participant: @other_participant
+      }
+    )
   end
 
   def presence

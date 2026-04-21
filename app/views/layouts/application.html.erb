@@ -22,12 +22,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-stone-50 text-stone-900 min-h-screen"
-        <% if user_signed_in? %>
-          data-controller="turbo-poll"
-          data-turbo-poll-url-value="<%= live_notifications_path(include_list: controller_name == "notifications") %>"
-          data-turbo-poll-interval-value="5000"
-        <% end %>>
+  <body class="bg-stone-50 text-stone-900 min-h-screen">
     <% if user_signed_in? %>
       <%= turbo_stream_from [current_user, :notifications] %>
       <%= turbo_stream_from [current_user, :chats] %>
@@ -108,6 +103,10 @@
     </div>
   </div>
 </nav>
+      <div class="hidden"
+           data-controller="turbo-poll"
+           data-turbo-poll-url-value="<%= live_notifications_path(include_list: controller_name == "notifications") %>"
+           data-turbo-poll-interval-value="5000"></div>
     <% end %>
 
     <% if notice %>

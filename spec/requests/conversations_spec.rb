@@ -55,4 +55,20 @@ RSpec.describe "Conversations", type: :request do
       expect(response.body).to include("conversation_presence")
     end
   end
+
+  describe "GET /conversations/:id/live" do
+    it "renders a turbo stream update for the conversation messages" do
+      conversation = Conversation.create!
+      create(:conversation_participant, conversation: conversation, user: user)
+      create(:conversation_participant, conversation: conversation, user: connected_user)
+      create(:message, conversation: conversation, user: connected_user, body: "hi")
+
+      get live_conversation_path(conversation), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+      expect(response.body).to include("conversation_messages")
+      expect(response.body).to include("hi")
+    end
+  end
 end

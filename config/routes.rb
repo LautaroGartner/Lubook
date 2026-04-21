@@ -1,6 +1,19 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: { omniauth_callbacks: "users/omniauth_callbacks" }
 
+  namespace :api do
+    namespace :v1 do
+      namespace :auth do
+        post :sign_in, to: "sessions#create"
+        delete :sign_out, to: "sessions#destroy"
+      end
+
+      get :me, to: "users#show"
+      get :feed, to: "feed#index"
+      resources :posts, only: [ :show ]
+    end
+  end
+
   root "pages#home"
 
   resources :users, only: [ :index, :show ] do
@@ -18,6 +31,7 @@ Rails.application.routes.draw do
 
   resources :conversations, only: [ :index, :show, :create ] do
     member do
+      get :live
       get :presence
       patch :read
     end
