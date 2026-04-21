@@ -75,6 +75,10 @@ class User < ApplicationRecord
       .count
   end
 
+  def active_now?
+    last_active_at.present? && last_active_at >= 5.minutes.ago
+  end
+
   private
 
   def normalize_username

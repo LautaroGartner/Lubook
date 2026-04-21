@@ -1,0 +1,7 @@
+<div id="chat_read_state" class="px-6 py-2 border-t border-stone-100 bg-white">
+  <% if (receipt_text = chat_read_receipt_text(conversation, current_user, other_participant)).present? %>
+    <p class="text-xs text-stone-500 text-right"><%= receipt_text %></p>
+  <% else %>
+    <div class="h-[18px]"></div>
+  <% end %>
+</div>

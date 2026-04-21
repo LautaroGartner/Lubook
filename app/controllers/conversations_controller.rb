@@ -57,5 +57,18 @@ class ConversationsController < ApplicationController
       partial: "shared/chat_badge",
       locals: { count: current_user.unread_chats_count }
     )
+
+    @conversation.participants.where.not(id: current_user.id).find_each do |viewer|
+      Turbo::StreamsChannel.broadcast_replace_to(
+        [ @conversation, viewer ],
+        target: "chat_read_state",
+        partial: "conversations/read_state",
+        locals: {
+          conversation: @conversation,
+          current_user: viewer,
+          other_participant: @conversation.other_participant_for(viewer)
+        }
+      )
+    end
   end
 end

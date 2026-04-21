@@ -1,13 +1,19 @@
 class Message < ApplicationRecord
   belongs_to :conversation, touch: true
   belongs_to :user
+  belongs_to :reply_to_message, class_name: "Message", optional: true
+  has_one_attached :image
 
-  validates :body, presence: true, length: { maximum: 2000 }
+  validates :body, length: { maximum: 2000 }
+  validate :body_or_image_present
+  validate :acceptable_image
+  validate :reply_to_message_in_same_conversation
 
   after_create_commit :update_conversation_activity!
   after_create_commit :mark_sender_as_read!
   after_create_commit :broadcast_to_other_participants!
   after_create_commit :broadcast_chat_badges!
+  after_create_commit :broadcast_read_states!
 
   private
 
@@ -37,5 +43,45 @@ class Message < ApplicationRecord
         locals: { count: recipient.unread_chats_count }
       )
     end
+  end
+
+  def broadcast_read_states!
+    conversation.participants.find_each do |participant|
+      Turbo::StreamsChannel.broadcast_replace_to(
+        [ conversation, participant ],
+        target: "chat_read_state",
+        partial: "conversations/read_state",
+        locals: {
+          conversation: conversation,
+          current_user: participant,
+          other_participant: conversation.other_participant_for(participant)
+        }
+      )
+    end
+  end
+
+  def body_or_image_present
+    return if body.present? || image.attached?
+
+    errors.add(:base, "Add a message or a photo.")
+  end
+
+  def acceptable_image
+    return unless image.attached?
+
+    unless image.blob.content_type.in?(%w[image/png image/jpeg image/jpg image/gif image/webp image/heic image/heif image/svg+xml])
+      errors.add(:image, "must be a PNG, JPG, GIF, WebP, HEIC, or SVG.")
+    end
+
+    return unless image.blob.byte_size > 10.megabytes
+
+    errors.add(:image, "must be smaller than 10MB.")
+  end
+
+  def reply_to_message_in_same_conversation
+    return unless reply_to_message_id.present?
+    return if reply_to_message&.conversation_id == conversation_id
+
+    errors.add(:reply_to_message, "must belong to the same conversation.")
   end
 end

@@ -44,7 +44,15 @@
               <% end %>
             </div>
             <% if latest_message %>
-              <p class="mt-1 text-sm text-stone-500 line-clamp-2"><%= truncate(latest_message.body, length: 90) %></p>
+              <% preview_text =
+                   if latest_message.body.present?
+                     truncate(latest_message.body, length: 90)
+                   elsif latest_message.image.attached?
+                     "Sent a photo"
+                   end %>
+              <% if preview_text.present? %>
+                <p class="mt-1 text-sm text-stone-500 line-clamp-2"><%= preview_text %></p>
+              <% end %>
             <% end %>
           <% end %>
         <% end %>

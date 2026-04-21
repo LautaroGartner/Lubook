@@ -21,6 +21,10 @@ class Conversation < ApplicationRecord
     participants.where.not(id: user.id).first
   end
 
+  def participant_for(user)
+    conversation_participants.find_by(user: user)
+  end
+
   private_class_method def self.create_with_participants!(user_a, user_b)
     transaction do
       conversation = create!

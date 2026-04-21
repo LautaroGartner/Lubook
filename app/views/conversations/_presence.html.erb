@@ -1,0 +1,8 @@
+<div id="conversation_presence" class="mt-2 text-sm">
+  <% if (presence_text = chat_presence_text(other_participant)).present? %>
+    <p class="inline-flex items-center gap-2 font-medium text-stone-700">
+      <span class="inline-flex h-2.5 w-2.5 rounded-full <%= other_participant.active_now? ? "bg-green-500" : "bg-stone-300" %>"></span>
+      <span><%= presence_text %></span>
+    </p>
+  <% end %>
+</div>

@@ -1,6 +1,6 @@
 <% content_for :title, @other_participant&.username || "Chat" %>
 
-<section class="max-w-4xl mx-auto bg-white border border-stone-200 rounded-xl flex flex-col min-h-[34rem]">
+<section class="max-w-4xl mx-auto bg-white border border-stone-200 rounded-xl flex flex-col min-h-[34rem]" data-controller="lightbox message-form">
   <header class="px-6 py-4 border-b border-stone-200">
     <div class="flex items-center justify-between gap-4">
       <div>
@@ -12,6 +12,7 @@
           <%= @other_participant&.profile&.display_name.presence || @other_participant&.username %>
         </h2>
         <p class="text-sm text-stone-500">@<%= @other_participant&.username %></p>
+        <%= render "conversations/presence", other_participant: @other_participant %>
       </div>
       <% if @other_participant %>
         <%= link_to "View profile", user_path(@other_participant),
@@ -30,5 +31,6 @@
     <% end %>
   </div>
 
+  <%= render "conversations/read_state", conversation: @conversation, current_user: current_user, other_participant: @other_participant %>
   <%= render "messages/form", conversation: @conversation, message: @message %>
 </section>

@@ -26,4 +26,23 @@ module ApplicationHelper
 
     safe_join(paragraphs.presence || [ content_tag(:p, "") ])
   end
+
+  def chat_presence_text(user)
+    return unless user&.share_last_seen?
+    return "Active now" if user.active_now?
+    return unless user.last_active_at.present?
+
+    "Last active #{time_ago_in_words(user.last_active_at)} ago"
+  end
+
+  def chat_read_receipt_text(conversation, current_user, other_participant)
+    return unless other_participant&.share_read_receipts?
+
+    other_state = conversation.participant_for(other_participant)
+    last_outgoing_message = conversation.messages.where(user: current_user).order(created_at: :desc).first
+    return unless other_state&.last_read_at.present? && last_outgoing_message.present?
+    return unless other_state.last_read_at >= last_outgoing_message.created_at
+
+    "Seen #{time_ago_in_words(other_state.last_read_at)} ago"
+  end
 end

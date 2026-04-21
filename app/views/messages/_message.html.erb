@@ -1,8 +1,44 @@
 <div class="flex <%= message.user_id == current_user_id ? "justify-end" : "justify-start" %>">
   <div class="max-w-[85%] rounded-2xl px-4 py-3 <%= message.user_id == current_user_id ? "bg-rose-500 text-white" : "bg-white border border-stone-200 text-stone-800" %>">
-    <div class="text-sm whitespace-pre-wrap"><%= simple_format(message.body) %></div>
-    <p class="mt-2 text-[11px] <%= message.user_id == current_user_id ? "text-rose-100" : "text-stone-400" %>">
-      <%= message.created_at.strftime("%b %-d, %-I:%M %p") %>
-    </p>
+    <% if message.reply_to_message.present? %>
+      <% replied_message = message.reply_to_message %>
+      <div class="mb-3 rounded-2xl px-3 py-2 <%= message.user_id == current_user_id ? "bg-rose-400/70 text-rose-50" : "bg-stone-50 text-stone-600" %>">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.14em]">
+          Replying to <%= replied_message.user.profile&.display_name.presence || replied_message.user.username %>
+        </p>
+        <p class="mt-1 text-sm line-clamp-2">
+          <% if replied_message.body.present? %>
+            <%= truncate(replied_message.body, length: 90) %>
+          <% elsif replied_message.image.attached? %>
+            Photo
+          <% end %>
+        </p>
+      </div>
+    <% end %>
+    <% if message.image.attached? %>
+      <% display_image = message.image.variable? ? message.image.variant(resize_to_limit: [1600, 1600], saver: { quality: 85 }) : message.image %>
+      <%= image_tag display_image,
+            class: "mb-3 max-h-80 w-auto rounded-2xl object-cover cursor-zoom-in transition-opacity hover:opacity-95",
+            data: {
+              action: "click->lightbox#open",
+              lightbox_full_url_value: url_for(message.image)
+            } %>
+    <% end %>
+    <% if message.body.present? %>
+      <div class="text-sm whitespace-pre-wrap"><%= simple_format(message.body) %></div>
+    <% end %>
+    <div class="mt-2 flex items-center justify-between gap-3">
+      <p class="text-[11px] <%= message.user_id == current_user_id ? "text-rose-100" : "text-stone-400" %>">
+        <%= message.created_at.strftime("%b %-d, %-I:%M %p") %>
+      </p>
+      <button type="button"
+              data-action="message-form#reply"
+              data-message-id="<%= message.id %>"
+              data-message-author="<%= message.user.profile&.display_name.presence || message.user.username %>"
+              data-message-preview="<%= j(message.body.present? ? truncate(message.body, length: 90) : "Photo") %>"
+              class="text-[11px] font-medium <%= message.user_id == current_user_id ? "text-rose-100 hover:text-white" : "text-stone-400 hover:text-stone-700" %> transition-colors">
+        Reply
+      </button>
+    </div>
   </div>
 </div>

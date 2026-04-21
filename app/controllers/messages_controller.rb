@@ -16,7 +16,7 @@ class MessagesController < ApplicationController
             turbo_stream.replace(
               "message_form",
               partial: "messages/form",
-              locals: { conversation: @conversation, message: @conversation.messages.build }
+              locals: { conversation: @conversation, message: @conversation.messages.build(reply_to_message: nil) }
             )
           ]
         end
@@ -49,6 +49,6 @@ class MessagesController < ApplicationController
   end
 
   def message_params
-    params.require(:message).permit(:body)
+    params.require(:message).permit(:body, :image, :reply_to_message_id)
   end
 end

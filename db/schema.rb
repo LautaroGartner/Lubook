@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_21_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_21_143000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -102,10 +102,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_120000) do
     t.text "body", null: false
     t.bigint "conversation_id", null: false
     t.datetime "created_at", null: false
+    t.bigint "reply_to_message_id"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["conversation_id", "created_at"], name: "index_messages_on_conversation_id_and_created_at"
     t.index ["conversation_id"], name: "index_messages_on_conversation_id"
+    t.index ["reply_to_message_id"], name: "index_messages_on_reply_to_message_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
   end
 
@@ -154,6 +156,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_120000) do
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.integer "failed_attempts", default: 0, null: false
+    t.datetime "last_active_at"
     t.datetime "last_sign_in_at"
     t.string "last_sign_in_ip"
     t.datetime "locked_at"
@@ -161,6 +164,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_120000) do
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
+    t.boolean "share_last_seen", default: true, null: false
+    t.boolean "share_read_receipts", default: true, null: false
     t.integer "sign_in_count", default: 0, null: false
     t.string "uid"
     t.string "unconfirmed_email"
@@ -186,6 +191,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_21_120000) do
   add_foreign_key "follows", "users", column: "requester_id", on_delete: :cascade
   add_foreign_key "likes", "users", on_delete: :cascade
   add_foreign_key "messages", "conversations"
+  add_foreign_key "messages", "messages", column: "reply_to_message_id"
   add_foreign_key "messages", "users", on_delete: :cascade
   add_foreign_key "notifications", "users", column: "actor_id", on_delete: :cascade
   add_foreign_key "notifications", "users", column: "recipient_id", on_delete: :cascade
