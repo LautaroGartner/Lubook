@@ -18,6 +18,7 @@ gem "kamal", require: false
 gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 gem "postmark-rails"
+gem "ruby-vips", "~> 2.2"
 
 # --- Phase 1 additions ---
 gem "devise"

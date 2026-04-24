@@ -45,7 +45,8 @@ Rails.application.routes.draw do
   resources :posts, only: [ :create, :show, :edit, :update, :destroy ] do
     resources :comments, only: [ :create, :destroy ], shallow: true
     resource  :like, only: [ :create, :destroy ], module: :posts
-  end
+    resources :images, only: :destroy, controller: "post_images"
+end
 
   resources :conversations, only: [ :index, :show, :create ] do
     member do

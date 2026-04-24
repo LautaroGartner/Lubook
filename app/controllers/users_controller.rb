@@ -18,7 +18,7 @@ class UsersController < ApplicationController
 
     @pagy, @posts = pagy(
       @user.posts
-           .includes(:likes, :comments, user: { profile: { avatar_attachment: :blob } }, image_attachment: :blob)
+           .includes(:likes, :comments, user: { profile: { avatar_attachment: :blob } }, images_attachments: :blob)
            .order(created_at: :desc)
     )
   end

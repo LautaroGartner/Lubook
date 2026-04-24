@@ -5,7 +5,7 @@ class PagesController < ApplicationController
 
     @pagy, @posts = pagy(
       Post.where(user_id: feed_user_ids)
-          .includes(:likes, :comments, user: { profile: { avatar_attachment: :blob } }, image_attachment: :blob)
+          .includes(:likes, :comments, user: { profile: { avatar_attachment: :blob } }, images_attachments: :blob)
           .order(created_at: :desc)
     )
   end

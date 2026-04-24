@@ -6,7 +6,7 @@ class Api::V1::FeedController < Api::V1::BaseController
     feed_user_ids = following_ids + [ current_api_user.id ]
 
     posts = Post.where(user_id: feed_user_ids)
-                .includes(:likes, :comments, user: { profile: { avatar_attachment: :blob } }, image_attachment: :blob)
+                .includes(:likes, :comments, user: { profile: { avatar_attachment: :blob } }, images_attachments: :blob)
                 .order(created_at: :desc)
 
     render json: {

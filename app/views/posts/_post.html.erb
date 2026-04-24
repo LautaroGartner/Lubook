@@ -46,15 +46,40 @@
     <%= simple_format(post.body) %>
   </div>
 
-  <% if post.image.attached? %>
-    <%= image_tag post.image.variant(resize_to_limit: [1600, 1600], saver: { quality: 85 }),
-          class: "mt-3 max-w-full max-h-[32rem] object-contain cursor-zoom-in transition-opacity hover:opacity-95",
-          data: {
-            action: "click->lightbox#open",
-            lightbox_full_url_value: url_for(post.image),
-            post_image: true
-          } %>
-  <% end %>
+    <% if post.images.attached? %>
+  <div data-controller="carrousel"
+       data-action="keydown.left@window->carrousel#prev keydown.right@window->carrousel#next"
+       tabindex="0"
+       class="relative max-h-[600px] bg-stone-50 rounded-lg overflow-hidden mb-4 focus:outline-none">
+    <% post.images.each_with_index do |img, i| %>
+      <button type="button"
+              data-carrousel-target="slide"
+              data-action="click->lightbox#open"
+              data-lightbox-full-url-value="<%= url_for(img) %>"
+              class="w-full <%= 'hidden' unless i.zero? %>">
+        <%= image_tag img.variant(resize_to_limit: [1200, 1200]),
+              class: "w-full max-h-[600px] object-contain mx-auto" %>
+      </button>
+    <% end %>
+
+    <% if post.images.count > 1 %>
+      <button type="button" data-action="carrousel#prev"
+              class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center transition">‹</button>
+      <button type="button" data-action="carrousel#next"
+              class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-8 h-8 flex items-center justify-center transition">›</button>
+
+      <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+        <% post.images.each_with_index do |_, i| %>
+          <button type="button"
+                  data-carrousel-target="dot"
+                  data-action="carrousel#goto"
+                  data-carrousel-index-param="<%= i %>"
+                  class="w-2 h-2 rounded-full transition <%= i.zero? ? 'bg-white' : 'bg-white/50' %>"></button>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
 
   <div class="flex items-center gap-4 text-sm text-stone-600 pt-3 mt-1">
     <%= render "posts/like_button", post: post %>

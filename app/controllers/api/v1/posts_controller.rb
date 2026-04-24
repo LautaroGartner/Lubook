@@ -17,7 +17,7 @@ class Api::V1::PostsController < Api::V1::BaseController
       :likes,
       { comments: [ :likes, :parent, { user: { profile: { avatar_attachment: :blob } } } ] },
       { user: { profile: { avatar_attachment: :blob } } },
-      image_attachment: :blob
+      images_attachments: :blob
     ).find(params[:id])
 
     comments = post.comments.chronological.includes(:likes, :parent, user: { profile: { avatar_attachment: :blob } })
