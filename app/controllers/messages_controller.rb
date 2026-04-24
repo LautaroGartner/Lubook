@@ -27,7 +27,7 @@ class MessagesController < ApplicationController
             )
           ]
         end
-        format.html { redirect_to conversation_path(@conversation) }
+        format.html { redirect_to helpers.chat_path_for(@conversation, current_user) }
       end
     else
       @messages = @conversation.messages.includes(:user).order(:created_at)

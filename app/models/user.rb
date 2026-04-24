@@ -13,6 +13,7 @@ class User < ApplicationRecord
   has_many :posts,    dependent: :destroy
   has_many :comments, dependent: :destroy
   has_many :likes,    dependent: :destroy
+  has_many :api_tokens, dependent: :destroy
   has_many :notifications, foreign_key: :recipient_id, dependent: :destroy, inverse_of: :recipient
   has_many :sent_notifications, class_name: "Notification", foreign_key: :actor_id, dependent: :destroy, inverse_of: :actor
   has_many :conversation_participants, dependent: :destroy

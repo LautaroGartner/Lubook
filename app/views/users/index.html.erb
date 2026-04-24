@@ -31,8 +31,7 @@
 
         <div class="flex flex-wrap items-center justify-end gap-2">
           <% if current_user.connected_with?(user) %>
-            <%= link_to "Message", conversations_path(user_id: user.id),
-                  data: { turbo_method: :post },
+            <%= link_to "Message", chat_path(user.username),
                   class: "px-3 py-1 text-sm bg-stone-900 text-white rounded-full hover:bg-stone-800 transition-colors" %>
           <% end %>
           <% if follow.nil? %>

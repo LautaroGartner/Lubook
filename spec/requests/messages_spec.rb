@@ -11,6 +11,7 @@ RSpec.describe "Messages", type: :request do
   end
 
   before { sign_in user }
+  before { create(:follow, requester: user, receiver: other_user, status: :accepted) }
 
   describe "POST /conversations/:conversation_id/messages" do
     it "appends a message over turbo stream without redirecting" do
@@ -58,9 +59,9 @@ RSpec.describe "Messages", type: :request do
     end
   end
 
-  describe "PATCH /conversations/:id/read" do
+  describe "PATCH /chat/:username/read" do
     it "marks the conversation as read for the current user" do
-      patch read_conversation_path(conversation)
+      patch read_chat_path(other_user.username)
 
       expect(response).to have_http_status(:ok)
       expect(conversation.conversation_participants.find_by(user: user).reload.last_read_at).to be_present

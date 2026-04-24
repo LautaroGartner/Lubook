@@ -17,7 +17,7 @@ class ConversationsController < ApplicationController
     end
 
     conversation = Conversation.direct_between!(current_user, other_user)
-    redirect_to conversation_path(conversation)
+    redirect_to chat_path(other_user.username)
   end
 
   def show
@@ -85,7 +85,13 @@ class ConversationsController < ApplicationController
 
   def set_conversation
     @conversations = current_user.conversations.includes(:participants).recent
-    @conversation = @conversations.find(params[:id])
+    @conversation =
+      if params[:username].present?
+        other_user = current_user.connected_users.find_by!("lower(username) = ?", params[:username].to_s.downcase)
+        Conversation.direct_between!(current_user, other_user)
+      else
+        @conversations.find(params[:id])
+      end
   end
 
   def load_chat_finder

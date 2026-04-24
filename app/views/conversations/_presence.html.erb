@@ -1,7 +1,7 @@
 <div id="conversation_presence"
      class="mt-2 text-sm"
      data-controller="turbo-poll"
-     data-turbo-poll-url-value="<%= presence_conversation_path(conversation) %>"
+     data-turbo-poll-url-value="<%= presence_chat_path_for(conversation, current_user) %>"
      data-turbo-poll-interval-value="10000">
   <% if (presence_text = chat_presence_text(other_participant)).present? %>
     <p class="inline-flex items-center gap-2 font-medium text-stone-700">

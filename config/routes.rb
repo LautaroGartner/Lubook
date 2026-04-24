@@ -10,6 +10,17 @@ Rails.application.routes.draw do
 
       get :me, to: "users#show"
       get :feed, to: "feed#index"
+      resources :conversations, only: [ :index, :show, :create ] do
+        member do
+          patch :read
+        end
+        resources :messages, only: :create
+      end
+      resources :notifications, only: [ :index, :destroy ] do
+        collection do
+          delete :clear
+        end
+      end
       resources :posts, only: [ :show, :create ] do
         resources :comments, only: [ :create ]
         resource :like, only: [ :create, :destroy ], module: :posts
@@ -44,6 +55,11 @@ Rails.application.routes.draw do
     end
     resources :messages, only: :create
   end
+
+  get "/chat/:username", to: "conversations#show", as: :chat
+  get "/chat/:username/live", to: "conversations#live", as: :live_chat
+  get "/chat/:username/presence", to: "conversations#presence", as: :presence_chat
+  patch "/chat/:username/read", to: "conversations#read", as: :read_chat
 
   resources :notifications, only: [ :index, :destroy ] do
     collection do

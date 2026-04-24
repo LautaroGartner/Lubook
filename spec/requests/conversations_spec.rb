@@ -24,31 +24,31 @@ RSpec.describe "Conversations", type: :request do
       post conversations_path, params: { user_id: connected_user.id }
 
       conversation = Conversation.last
-      expect(response).to redirect_to(conversation_path(conversation))
+      expect(response).to redirect_to(chat_path(connected_user.username))
       expect(conversation.participants).to include(user, connected_user)
     end
   end
 
-  describe "GET /conversations/:id" do
+  describe "GET /chat/:username" do
     it "shows the active chat without the finder panel" do
       conversation = Conversation.create!
       create(:conversation_participant, conversation: conversation, user: user)
       create(:conversation_participant, conversation: conversation, user: connected_user)
 
-      get conversation_path(conversation)
+      get chat_path(connected_user.username)
 
       expect(response.body).to include("Back to chats")
       expect(response.body).not_to include("Find someone to message")
     end
   end
 
-  describe "GET /conversations/:id/presence" do
+  describe "GET /chat/:username/presence" do
     it "renders a turbo stream update for chat presence" do
       conversation = Conversation.create!
       create(:conversation_participant, conversation: conversation, user: user)
       create(:conversation_participant, conversation: conversation, user: connected_user)
 
-      get presence_conversation_path(conversation), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
+      get presence_chat_path(connected_user.username), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
 
       expect(response).to have_http_status(:ok)
       expect(response.media_type).to eq("text/vnd.turbo-stream.html")
@@ -56,14 +56,14 @@ RSpec.describe "Conversations", type: :request do
     end
   end
 
-  describe "GET /conversations/:id/live" do
+  describe "GET /chat/:username/live" do
     it "renders a turbo stream update for the conversation messages" do
       conversation = Conversation.create!
       create(:conversation_participant, conversation: conversation, user: user)
       create(:conversation_participant, conversation: conversation, user: connected_user)
       create(:message, conversation: conversation, user: connected_user, body: "hi")
 
-      get live_conversation_path(conversation), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
+      get live_chat_path(connected_user.username), headers: { "ACCEPT" => "text/vnd.turbo-stream.html" }
 
       expect(response).to have_http_status(:ok)
       expect(response.media_type).to eq("text/vnd.turbo-stream.html")

@@ -56,4 +56,32 @@ module ApplicationHelper
                 .order(created_at: :desc)
                 .pick(:id)
   end
+
+  def chat_path_for(conversation, viewer)
+    other_participant = conversation.other_participant_for(viewer)
+    return conversations_path unless other_participant
+
+    chat_path(other_participant.username)
+  end
+
+  def live_chat_path_for(conversation, viewer)
+    other_participant = conversation.other_participant_for(viewer)
+    return live_conversation_path(conversation) unless other_participant
+
+    live_chat_path(other_participant.username)
+  end
+
+  def presence_chat_path_for(conversation, viewer)
+    other_participant = conversation.other_participant_for(viewer)
+    return presence_conversation_path(conversation) unless other_participant
+
+    presence_chat_path(other_participant.username)
+  end
+
+  def read_chat_path_for(conversation, viewer)
+    other_participant = conversation.other_participant_for(viewer)
+    return read_conversation_path(conversation) unless other_participant
+
+    read_chat_path(other_participant.username)
+  end
 end

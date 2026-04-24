@@ -18,8 +18,7 @@
                   <p class="text-sm font-semibold text-stone-900 truncate"><%= user.profile&.display_name.presence || user.username %></p>
                   <p class="text-xs text-stone-500 truncate">@<%= user.username %></p>
                 </div>
-                <%= link_to "Message", conversations_path(user_id: user.id),
-                      data: { turbo_method: :post },
+                <%= link_to "Message", chat_path(user.username),
                       class: "px-3 py-1.5 text-sm bg-stone-900 text-white rounded-full hover:bg-stone-800 transition-colors" %>
               </div>
             <% end %>
@@ -36,7 +35,7 @@
           <% other_user = conversation.other_participant_for(current_user) %>
           <% unread = conversation.conversation_participants.find { |participant| participant.user_id == current_user.id }&.last_read_at %>
           <% latest_message = conversation.messages.max_by(&:created_at) %>
-          <%= link_to conversation_path(conversation),
+          <%= link_to chat_path_for(conversation, current_user),
                 class: "block px-4 py-3 hover:bg-stone-50 transition-colors" do %>
             <div class="flex items-center justify-between gap-3">
               <p class="font-semibold text-stone-900"><%= other_user&.profile&.display_name.presence || other_user&.username %></p>

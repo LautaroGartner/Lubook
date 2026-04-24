@@ -50,7 +50,7 @@ class Notification < ApplicationRecord
     when Follow
       view_context.user_path(actor)
     when Message
-      view_context.conversation_path(notifiable.conversation)
+      view_context.chat_path(notifiable.conversation.other_participant_for(recipient).username)
     else
       view_context.root_path
     end

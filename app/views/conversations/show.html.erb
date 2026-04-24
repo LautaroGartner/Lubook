@@ -2,7 +2,7 @@
 
 <section class="max-w-4xl mx-auto bg-white border border-stone-200 rounded-xl flex flex-col min-h-[34rem]"
          data-controller="lightbox message-form turbo-poll"
-         data-turbo-poll-url-value="<%= live_conversation_path(@conversation) %>"
+         data-turbo-poll-url-value="<%= live_chat_path_for(@conversation, current_user) %>"
          data-turbo-poll-interval-value="3000">
   <header class="px-6 py-4 border-b border-stone-200">
     <div class="flex items-center justify-between gap-4">
