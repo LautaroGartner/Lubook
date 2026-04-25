@@ -61,4 +61,13 @@ Those URLs are not a substitute for per-viewer access control. If posts or chats
 
 ## Background work
 
-Production uses `solid_queue` and runs the queue supervisor inside Puma with `SOLID_QUEUE_IN_PUMA=1`. That is good for the current single-machine Fly setup. When the app grows, split jobs into a dedicated Fly process and remove the in-Puma supervisor.
+Production currently uses the in-process `async` job adapter and `memory_store` cache so deploys do not depend on missing Solid Queue or Solid Cache tables.
+
+Before enabling `solid_queue`, `solid_cache`, or `SOLID_QUEUE_IN_PUMA=1`, migrate the production database for the `queue` and `cache` database roles and verify the tables exist:
+
+```sh
+fly ssh console -C "bin/rails db:prepare"
+fly ssh console -C "bin/rails runner 'puts ActiveRecord::Base.connection.data_sources.grep(/solid_/)'"
+```
+
+When the app grows, run jobs as a dedicated Fly process instead of inside Puma.

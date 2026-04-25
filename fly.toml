@@ -9,7 +9,6 @@ console_command = '/rails/bin/rails console'
   APP_HOST = "lubook.fly.dev"
   ACTIVE_STORAGE_SERVICE = "production_local"
   RAILS_LOG_TO_STDOUT = "1"
-  SOLID_QUEUE_IN_PUMA = "1"
 
 [processes]
   app = './bin/rails server -p 3000 -b 0.0.0.0'
