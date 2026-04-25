@@ -21,6 +21,7 @@ export default class extends Controller {
 
   openOverlay(urls, startIndex) {
     let currentIndex = startIndex
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0
 
     const overlay = document.createElement("div")
     overlay.className = "fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 sm:p-4 select-none"
@@ -68,7 +69,10 @@ export default class extends Controller {
       nextBtn.disabled = currentIndex === urls.length - 1
     }
 
+    const unlockPage = this.lockPageScroll(scrollY)
+
     const close = () => {
+      unlockPage()
       overlay.remove()
       document.removeEventListener("keydown", onKey)
     }
@@ -114,6 +118,12 @@ export default class extends Controller {
       touchStartY = null
     }, { passive: true })
 
+    overlay.addEventListener("wheel", (e) => {
+      e.preventDefault()
+    }, { passive: false })
+    overlay.addEventListener("touchmove", (e) => {
+      e.preventDefault()
+    }, { passive: false })
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay || e.target === row) close()
     })
@@ -121,5 +131,32 @@ export default class extends Controller {
     updateButtons()
     document.addEventListener("keydown", onKey)
     document.body.appendChild(overlay)
+  }
+
+  lockPageScroll(scrollY) {
+    const body = document.body
+    const html = document.documentElement
+    const previousBodyStyles = {
+      overflow: body.style.overflow,
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width
+    }
+    const previousHtmlOverflow = html.style.overflow
+
+    html.style.overflow = "hidden"
+    body.style.overflow = "hidden"
+    body.style.position = "fixed"
+    body.style.top = `-${scrollY}px`
+    body.style.width = "100%"
+
+    return () => {
+      html.style.overflow = previousHtmlOverflow
+      body.style.overflow = previousBodyStyles.overflow
+      body.style.position = previousBodyStyles.position
+      body.style.top = previousBodyStyles.top
+      body.style.width = previousBodyStyles.width
+      window.scrollTo(0, scrollY)
+    }
   }
 }

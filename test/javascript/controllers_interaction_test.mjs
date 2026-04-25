@@ -213,8 +213,45 @@ function testUploadMoveButtonsSyncPreviewAndSubmitOrder() {
   assert.equal(third.right.disabled, true)
 }
 
+function testLightboxLocksAndRestoresPageScroll() {
+  let restoredPosition = null
+  globalThis.window = {
+    scrollY: 240,
+    scrollTo: (x, y) => {
+      restoredPosition = [x, y]
+    }
+  }
+  globalThis.document = {
+    body: new FakeElement(),
+    documentElement: new FakeElement()
+  }
+
+  document.body.style.overflow = "auto"
+  document.documentElement.style.overflow = "auto"
+
+  const Lightbox = loadController("app/javascript/controllers/lightbox_controller.js")
+  const controller = new Lightbox()
+  const unlockPage = controller.lockPageScroll(window.scrollY)
+
+  assert.equal(document.documentElement.style.overflow, "hidden")
+  assert.equal(document.body.style.overflow, "hidden")
+  assert.equal(document.body.style.position, "fixed")
+  assert.equal(document.body.style.top, "-240px")
+  assert.equal(document.body.style.width, "100%")
+
+  unlockPage()
+
+  assert.equal(document.documentElement.style.overflow, "auto")
+  assert.equal(document.body.style.overflow, "auto")
+  assert.equal(document.body.style.position, undefined)
+  assert.equal(document.body.style.top, undefined)
+  assert.equal(document.body.style.width, undefined)
+  assert.deepEqual(restoredPosition, [0, 240])
+}
+
 testCarouselKeyboardTargetsViewedPost()
 testCarouselSwipeDoesNotOpenLightbox()
 testUploadMoveButtonsSyncPreviewAndSubmitOrder()
+testLightboxLocksAndRestoresPageScroll()
 
 console.log("JavaScript controller interaction tests passed")
