@@ -53,6 +53,12 @@ fly secrets set OBJECT_STORAGE_FORCE_PATH_STYLE=true
 
 Cloudflare R2, AWS S3, and Backblaze B2 all work through the same Active Storage `object_store` service.
 
+### Media privacy
+
+Feed and chat images currently use Rails Active Storage URLs that the browser can inspect in DevTools. That is normal for images rendered on a web page and does not expose app secrets.
+
+Those URLs are not a substitute for per-viewer access control. If posts or chats need private media, add authenticated Active Storage proxy controllers that check the current user before streaming the blob or variant.
+
 ## Background work
 
 Production uses `solid_queue` and runs the queue supervisor inside Puma with `SOLID_QUEUE_IN_PUMA=1`. That is good for the current single-machine Fly setup. When the app grows, split jobs into a dedicated Fly process and remove the in-Puma supervisor.
