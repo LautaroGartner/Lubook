@@ -54,17 +54,20 @@
        tabindex="0"
        class="relative focus:outline-none">
 
-    <div class="relative w-full overflow-hidden bg-stone-100 aspect-[4/5]">
-      <% post.images.each_with_index do |img, i| %>
-        <button type="button"
-                data-carrousel-target="slide"
-                data-action="click->carrousel#open"
-                data-lightbox-full-url-value="<%= url_for(img) %>"
-                class="<%= i.zero? ? 'block' : 'hidden' %> w-full h-full">
-          <%= image_tag img.variant(resize_to_limit: [1200, 1500]),
-                class: "w-full h-full object-cover block" %>
-        </button>
-      <% end %>
+    <div class="relative w-full overflow-hidden bg-stone-100 aspect-[4/5] touch-pan-y">
+      <div data-carrousel-target="track"
+           class="flex h-full transition-transform duration-300 ease-out will-change-transform">
+        <% post.images.each_with_index do |img, i| %>
+          <button type="button"
+                  data-carrousel-target="slide"
+                  data-action="click->carrousel#open"
+                  data-lightbox-full-url-value="<%= url_for(img) %>"
+                  class="block w-full h-full flex-none">
+            <%= image_tag img.variant(resize_to_limit: [1200, 1500]),
+                  class: "w-full h-full object-cover block" %>
+          </button>
+        <% end %>
+      </div>
 
       <% if post.images.count > 1 %>
         <div class="absolute top-3 right-3 bg-black/70 text-white text-xs px-2.5 py-1 rounded-full font-medium pointer-events-none z-10">

@@ -23,28 +23,27 @@ export default class extends Controller {
     let currentIndex = startIndex
 
     const overlay = document.createElement("div")
-    overlay.className = "fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 select-none"
+    overlay.className = "fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-3 sm:p-4 select-none"
 
-    // Inner row: prev button | image | next button
     const row = document.createElement("div")
-    row.className = "flex items-center gap-3 max-h-full"
+    row.className = "relative flex h-full w-full items-center justify-center"
 
     const prevBtn = document.createElement("button")
     prevBtn.type = "button"
-    prevBtn.className = "shrink-0 bg-black/60 hover:bg-black/80 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl transition"
+    prevBtn.className = "absolute left-2 top-1/2 z-10 -translate-y-1/2 bg-black/55 hover:bg-black/75 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-2xl transition"
     prevBtn.textContent = "‹"
 
     const img = document.createElement("img")
-    img.className = "max-h-[90vh] max-w-[80vw] rounded shadow-2xl object-contain"
+    img.className = "max-h-[calc(100dvh-8rem)] max-w-[calc(100vw-1.5rem)] sm:max-h-[90vh] sm:max-w-[80vw] rounded shadow-2xl object-contain transition-opacity duration-150 ease-out"
     img.src = urls[currentIndex]
 
     const nextBtn = document.createElement("button")
     nextBtn.type = "button"
-    nextBtn.className = "shrink-0 bg-black/60 hover:bg-black/80 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl transition"
+    nextBtn.className = "absolute right-2 top-1/2 z-10 -translate-y-1/2 bg-black/55 hover:bg-black/75 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center text-2xl transition"
     nextBtn.textContent = "›"
 
     const imgWrap = document.createElement("div")
-    imgWrap.className = "relative inline-block"
+    imgWrap.className = "relative inline-flex max-h-full max-w-full items-center justify-center"
     imgWrap.appendChild(img)
 
     if (urls.length > 1) {
@@ -77,9 +76,14 @@ export default class extends Controller {
     const go = (delta) => {
       const target = currentIndex + delta
       if (target < 0 || target >= urls.length) return
-      currentIndex = target
-      img.src = urls[currentIndex]
-      if (counter) counter.textContent = `${currentIndex + 1} / ${urls.length}`
+      const nextImage = new Image()
+      nextImage.onload = () => {
+        currentIndex = target
+        img.src = nextImage.src
+        if (counter) counter.textContent = `${currentIndex + 1} / ${urls.length}`
+        updateButtons()
+      }
+      nextImage.src = urls[target]
       updateButtons()
     }
 

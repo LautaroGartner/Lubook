@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["slide", "dot", "counter", "prevBtn", "nextBtn"]
+  static targets = ["track", "slide", "dot", "counter", "prevBtn", "nextBtn"]
   static values = { index: { type: Number, default: 0 } }
   static instances = new Set()
 
@@ -70,14 +70,14 @@ export default class extends Controller {
     if (!this.shouldHandle(event)) return
     if (event?.type === "keydown") event.preventDefault()
     if (this.indexValue >= this.slideTargets.length - 1) return
-    this.indexValue = this.indexValue + 1
+    this.showIndex(this.indexValue + 1)
   }
 
   prev(event) {
     if (!this.shouldHandle(event)) return
     if (event?.type === "keydown") event.preventDefault()
     if (this.indexValue <= 0) return
-    this.indexValue = this.indexValue - 1
+    this.showIndex(this.indexValue - 1)
   }
 
   open(event) {
@@ -96,7 +96,7 @@ export default class extends Controller {
 
   goto(e) {
     this.activate()
-    this.indexValue = Number(e.params.index)
+    this.showIndex(Number(e.params.index))
   }
 
   shouldHandle(event) {
@@ -135,11 +135,22 @@ export default class extends Controller {
   }
 
   indexValueChanged() {
+    this.render()
+  }
+
+  showIndex(index) {
+    this.indexValue = index
+    this.render()
+  }
+
+  render() {
     this.slideTargets.forEach((s, i) => {
       const active = i === this.indexValue
-      s.classList.toggle("hidden", !active)
-      s.classList.toggle("block", active)
+      s.tabIndex = active ? 0 : -1
     })
+    if (this.trackTarget) {
+      this.trackTarget.style.transform = `translateX(-${this.indexValue * 100}%)`
+    }
     this.dotTargets.forEach((d, i) => {
       const active = i === this.indexValue
       d.classList.toggle("bg-white", active)

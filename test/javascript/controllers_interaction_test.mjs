@@ -113,6 +113,7 @@ function createCarouselController(Carousel, rect) {
   const controller = new Carousel()
   controller.element = new FakeElement({ rect })
   controller.indexValue = 0
+  controller.trackTarget = new FakeElement()
   controller.slideTargets = [new FakeElement(), new FakeElement()]
   controller.dotTargets = []
   return controller
@@ -137,6 +138,7 @@ function testCarouselKeyboardTargetsViewedPost() {
 
   assert.equal(aboveCenter.indexValue, 0)
   assert.equal(centered.indexValue, 1)
+  assert.equal(centered.trackTarget.style.transform, "translateX(-100%)")
   assert.equal(prevented, 1)
 }
 
