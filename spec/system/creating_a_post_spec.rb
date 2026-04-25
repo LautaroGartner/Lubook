@@ -33,13 +33,13 @@ RSpec.describe "Creating a post", type: :system do
   it "renders an attached image directly beneath the post body on the feed" do
     image_file = png_upload
     post = user.posts.create!(body: "Flat white with my beautiful girl <3")
-    post.image.attach(io: image_file, filename: "post-image.png", content_type: "image/png")
+    post.images.attach(io: image_file, filename: "post-image.png", content_type: "image/png")
 
     visit root_path
 
     within("article", text: post.body) do
       expect(page).to have_css("div.prose-tight")
-      expect(page).to have_css("div.prose-tight + img.mt-3[data-post-image='true']")
+      expect(page).to have_css("div.prose-tight + div[data-controller='carrousel'] img")
     end
   ensure
     image_file&.close!

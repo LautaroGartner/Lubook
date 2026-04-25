@@ -76,3 +76,6 @@ jobs:
 
       - name: Run RSpec
         run: bundle exec rspec
+
+      - name: Run JavaScript controller tests
+        run: node test/javascript/controllers_interaction_test.mjs

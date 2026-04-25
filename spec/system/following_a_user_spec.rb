@@ -8,12 +8,10 @@ RSpec.describe "Following a user", type: :system do
 
   it "sends a follow request from the users index" do
     receiver  # ensure the receiver exists
-    visit users_path
+    visit users_path(q: receiver.username)
 
     expect(page).to have_content(receiver.username)
-
-    # Find the follow button near the receiver's username
-    click_button "Follow", match: :first
+    click_button "Follow"
 
     expect(Follow.where(requester: requester, receiver: receiver, status: "pending")).to exist
   end
