@@ -1,6 +1,12 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  app_host = ENV.fetch("APP_HOST", "lubook.fly.dev")
+  allowed_hosts = ENV.fetch("APP_HOSTS", app_host)
+    .split(",")
+    .map(&:strip)
+    .reject(&:blank?)
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
@@ -21,8 +27,9 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :production_local
+  # Keep Fly volume storage as the default, but allow switching to S3/R2 with:
+  # ACTIVE_STORAGE_SERVICE=object_store
+  config.active_storage.service = ENV.fetch("ACTIVE_STORAGE_SERVICE", "production_local").to_sym
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
@@ -39,8 +46,8 @@ Rails.application.configure do
     logger.formatter = ::Logger::Formatter.new
   end.then { |logger| ActiveSupport::TaggedLogging.new(logger) }
 
-  # Allowed hosts for this app
-  config.hosts << "lubook.fly.dev"
+  # Allowed hosts for this app.
+  allowed_hosts.each { |host| config.hosts << host }
   config.hosts << /.*\.fly\.dev/  # allow all fly.dev subdomains during deploy
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
@@ -53,11 +60,10 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
-  # Replace the default in-process memory cache store with a durable alternative.
-  config.cache_store = :memory_store, { size: 64.megabytes }
+  # Use durable database-backed cache and jobs in production.
+  config.cache_store = :solid_cache_store
 
-  # Replace the default in-process and non-durable queuing backend for Active Job.
-  config.active_job.queue_adapter = :async
+  config.active_job.queue_adapter = :solid_queue
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
@@ -69,7 +75,7 @@ Rails.application.configure do
   }
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.default_url_options = { host: "lubook.fly.dev", protocol: "https" }
+  config.action_mailer.default_url_options = { host: app_host, protocol: "https" }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

@@ -9,14 +9,15 @@ test:
 production_local:
   service: Disk
   root: /data/storage
-  
-# Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
-# amazon:
-#   service: S3
-#   access_key_id: <%= Rails.application.credentials.dig(:aws, :access_key_id) %>
-#   secret_access_key: <%= Rails.application.credentials.dig(:aws, :secret_access_key) %>
-#   region: us-east-1
-#   bucket: your_own_bucket-<%= Rails.env %>
+
+object_store:
+  service: S3
+  access_key_id: <%= ENV["OBJECT_STORAGE_ACCESS_KEY_ID"] %>
+  secret_access_key: <%= ENV["OBJECT_STORAGE_SECRET_ACCESS_KEY"] %>
+  region: <%= ENV.fetch("OBJECT_STORAGE_REGION", "auto") %>
+  bucket: <%= ENV["OBJECT_STORAGE_BUCKET"] %>
+  endpoint: <%= ENV["OBJECT_STORAGE_ENDPOINT"] %>
+  force_path_style: <%= ENV.fetch("OBJECT_STORAGE_FORCE_PATH_STYLE", "true") %>
 
 # Remember not to checkin your GCS keyfile to a repository
 # google:
