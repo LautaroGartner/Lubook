@@ -12,6 +12,12 @@ A privacy-conscious social platform built with Rails 8 and Hotwire, featuring re
 
 Originally started while studying Rails, Lubook grew into a production-deployed application focused on security, performance, privacy, and maintainability.
 
+## Live demo
+
+[Launch Lubook on Fly.io](https://lubook.fly.dev)
+
+![Lubook sign-in page](docs/screenshots/lubook-sign-in.png)
+
 ## Highlights
 
 - Email/password authentication with confirmation, password recovery, lockout, and session expiry.
@@ -134,7 +140,7 @@ See [production foundations](docs/production_foundations.md) for required secret
 
 ## Known limitations
 
-- Product screenshots and a short demo recording have not yet been added to this repository.
+- A short product demo recording has not yet been added to this repository.
 - GitHub OAuth requires deployment-specific credentials and is not part of the verified public demo path.
 - Cache and jobs are process-local in the current single-machine deployment.
 - Private media needs authenticated proxy delivery before Lubook can promise viewer-level file privacy.
