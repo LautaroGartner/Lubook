@@ -11,6 +11,8 @@ class FakeElement {
     this.rect = rect || { top: 0, bottom: 0 }
     this.style = {}
     this.textContent = ""
+    this.attributes = {}
+    this.focused = false
   }
 
   appendChild(child) {
@@ -22,6 +24,14 @@ class FakeElement {
 
   addEventListener() {}
   removeEventListener() {}
+
+  focus() {
+    this.focused = true
+  }
+
+  setAttribute(name, value) {
+    this.attributes[name] = value
+  }
 
   closest(selector) {
     let current = this
@@ -249,9 +259,32 @@ function testLightboxLocksAndRestoresPageScroll() {
   assert.deepEqual(restoredPosition, [0, 240])
 }
 
+function testPasswordVisibilityToggle() {
+  const PasswordVisibility = loadController("app/javascript/controllers/password_visibility_controller.js")
+  const controller = new PasswordVisibility()
+  controller.inputTarget = new FakeElement()
+  controller.inputTarget.type = "password"
+  controller.buttonTarget = new FakeElement()
+
+  controller.toggle()
+
+  assert.equal(controller.inputTarget.type, "text")
+  assert.equal(controller.buttonTarget.textContent, "Hide")
+  assert.equal(controller.buttonTarget.attributes["aria-label"], "Hide password")
+  assert.equal(controller.buttonTarget.attributes["aria-pressed"], "true")
+  assert.equal(controller.inputTarget.focused, true)
+
+  controller.toggle()
+
+  assert.equal(controller.inputTarget.type, "password")
+  assert.equal(controller.buttonTarget.textContent, "Show")
+  assert.equal(controller.buttonTarget.attributes["aria-pressed"], "false")
+}
+
 testCarouselKeyboardTargetsViewedPost()
 testCarouselSwipeDoesNotOpenLightbox()
 testUploadMoveButtonsSyncPreviewAndSubmitOrder()
 testLightboxLocksAndRestoresPageScroll()
+testPasswordVisibilityToggle()
 
 console.log("JavaScript controller interaction tests passed")
