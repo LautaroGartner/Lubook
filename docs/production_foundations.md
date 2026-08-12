@@ -1,13 +1,13 @@
 # Production foundations
 
-This app is configured to run on Fly.io with SSL, Postgres, Postmark mail, durable cache/jobs, and either Fly volume storage or S3-compatible object storage.
+This app is configured to run on Fly.io with SSL, Postgres, Postmark mail, process-local cache/jobs, and either Fly volume storage or S3-compatible object storage. Solid Cache and Solid Queue provide a future durable path but are not enabled in the current production deployment.
 
 ## Required Fly secrets
 
 Set these before deploying a real production instance:
 
 ```sh
-fly secrets set SECRET_KEY_BASE=...
+fly secrets set RAILS_MASTER_KEY=...
 fly secrets set DATABASE_URL=...
 fly secrets set POSTMARK_API_TOKEN=...
 fly secrets set MAILER_FROM=hello@your-domain.com
