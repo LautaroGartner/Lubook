@@ -7,7 +7,7 @@ RSpec.describe Devise::Mailer do
     mail = described_class.reset_password_instructions(user, "reset-token")
 
     expect(mail.subject).to eq("Reset your Lubook password")
-    expect(mail[:from].display_names).to eq(["Lubook"])
+    expect(mail[:from].display_names).to eq([ "Lubook" ])
     expect(mail.body.encoded).to include("Lubook", "Choose a new password")
   end
 
