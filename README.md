@@ -160,6 +160,8 @@ Lubook runs on **Fly.io** in the `gru` (São Paulo) region:
 - **TLS**: automatic via Fly's edge proxy
 - **Logs**: streamed to stdout, captured by `fly logs`
 
+The Fly app requires `DATABASE_URL` and `RAILS_MASTER_KEY` secrets. `DATABASE_URL` should be the Supabase transaction-pooler URL described above; `POSTMARK_API_TOKEN` is also required for transactional email. Copy `.env.example` for local development, but configure production values with `fly secrets set` rather than committing an `.env` file.
+
 Deploy command from a developer machine:
 
 ```bash
